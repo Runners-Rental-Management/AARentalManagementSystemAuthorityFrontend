@@ -1,0 +1,42 @@
+# From repo root: docker compose build && docker compose up
+# API: http://localhost:3000 — set NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 for the Next app (house-rental-management).
+# Replace JWT_* secrets before any real deployment (min 32 chars each; enforced by the app).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: rental
+      POSTGRES_PASSWORD: rental
+      POSTGRES_DB: rental
+    ports:
+      # Host 15432: Windows often reserves 5396–5495 (Hyper-V/WSL), blocking 5432.
+      - "15432:5432"
+    volumes:
+      - rental_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rental -d rental"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./house-management
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      DATABASE_URL: postgresql://rental:rental@postgres:5432/rental
+      CORS_ORIGIN: http://localhost:45000,http://127.0.0.1:45000,http://localhost:46000,http://127.0.0.1:46000,http://localhost:3000
+      JWT_ACCESS_SECRET: local-docker-only-change-me-access-secret-32chars-min
+      JWT_REFRESH_SECRET: local-docker-only-change-me-refresh-secret-32chars-min
+      PRISMA_DB_PUSH: "1"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  rental_pgdata:
