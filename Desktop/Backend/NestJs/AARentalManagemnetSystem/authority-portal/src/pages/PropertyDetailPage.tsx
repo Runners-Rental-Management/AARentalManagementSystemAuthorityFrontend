@@ -16,10 +16,12 @@ import {
   Home,
   Image,
   Info,
+  Loader2,
   Mail,
   MapPin,
   Phone,
   Ruler,
+  Sparkles,
   Tag,
   TrendingDown,
   TrendingUp,
@@ -27,14 +29,17 @@ import {
 import { StatusBadge } from "@/components/StatusBadge";
 import {
   apiGetProperty,
+  apiPredictPrice,
   apiReviewProperty,
   getAccessToken,
+  type PricePredictionResult,
 } from "@/lib/api";
 import { getErrorMessage } from "@/lib/api-error";
 import { useToast } from "@/components/Toast";
 import type { Property } from "@/lib/types";
 import { formatDate, formatMoney } from "@/lib/utils";
 import { computeListingRange, classifyRent } from "@/lib/addis-rent-benchmarks";
+import { listingRangeFromMlPrediction, mlSourceLabel } from "@/lib/ml-price-range";
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -58,16 +63,76 @@ function MarketPricePanel({ property }: { property: Property }) {
   const areaSqm = typeof property.area === "number" ? property.area : parseFloat(String(property.area)) || 0;
   const rent = typeof property.monthlyRent === "number" ? property.monthlyRent : parseFloat(String(property.monthlyRent)) || 0;
   const [showDetail, setShowDetail] = useState(false);
+  const [mlPrediction, setMlPrediction] = useState<PricePredictionResult | null>(null);
+  const [mlLoading, setMlLoading] = useState(true);
+  const [mlError, setMlError] = useState<string | null>(null);
 
-  const range = useMemo(
+  const benchmarkRange = useMemo(
     () => computeListingRange(property.subCity, property.propertyType, areaSqm),
     [property.subCity, property.propertyType, areaSqm],
   );
 
+  useEffect(() => {
+    let cancelled = false;
+    const token = getAccessToken();
+    if (!token || areaSqm <= 0) {
+      setMlLoading(false);
+      return;
+    }
+
+    setMlLoading(true);
+    setMlError(null);
+    apiPredictPrice(token, property)
+      .then((result) => {
+        if (!cancelled) setMlPrediction(result);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setMlPrediction(null);
+          setMlError(getErrorMessage(err));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setMlLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    property.id,
+    property.subCity,
+    property.propertyType,
+    property.bedrooms,
+    property.bathrooms,
+    property.area,
+    property.homeCondition,
+    property.amenities,
+    areaSqm,
+  ]);
+
+  const range = useMemo(() => {
+    if (mlPrediction) {
+      return listingRangeFromMlPrediction(mlPrediction, areaSqm);
+    }
+    return benchmarkRange;
+  }, [mlPrediction, benchmarkRange, areaSqm]);
+
+  if (mlLoading && !range) {
+    return (
+      <div className="rounded-xl border border-stone-200 bg-white p-6 flex flex-col items-center gap-3 text-stone-500">
+        <Loader2 className="w-6 h-6 animate-spin text-primary-600" />
+        <p className="text-xs font-medium">Loading ML price prediction…</p>
+      </div>
+    );
+  }
+
   if (!range) {
     return (
       <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-xs text-stone-500">
-        Market reference unavailable for this sub-city / property type combination.
+        {mlError
+          ? `Price prediction unavailable: ${mlError}`
+          : "Market reference unavailable for this sub-city / property type combination."}
       </div>
     );
   }
@@ -138,10 +203,31 @@ function MarketPricePanel({ property }: { property: Property }) {
     <div className="rounded-xl border border-stone-200 bg-white overflow-hidden shadow-sm">
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-700 to-violet-700 px-4 py-3.5">
-        <p className="text-white font-bold text-sm">Market Price Reference</p>
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary-200 shrink-0" />
+          <p className="text-white font-bold text-sm">
+            {mlPrediction ? "ML Market Price Prediction" : "Market Price Reference"}
+          </p>
+        </div>
         <p className="text-primary-200 text-xs mt-0.5">
           {property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)} · {property.subCity} · {areaSqm > 0 ? `${areaSqm} m²` : "unknown area"}
         </p>
+        {mlPrediction && (
+          <p className="text-primary-100/90 text-[10px] mt-1.5 flex flex-wrap items-center gap-1.5">
+            <span className="inline-flex items-center rounded-full bg-white/15 px-2 py-0.5 font-semibold uppercase tracking-wide">
+              {mlSourceLabel(mlPrediction.source)}
+            </span>
+            <span>Confidence: {mlPrediction.confidence}</span>
+          </p>
+        )}
+        {mlLoading && (
+          <p className="text-primary-100/80 text-[10px] mt-1 flex items-center gap-1">
+            <Loader2 className="w-3 h-3 animate-spin" /> Refreshing prediction…
+          </p>
+        )}
+        {mlError && !mlPrediction && (
+          <p className="text-amber-200 text-[10px] mt-1">Using static benchmarks (ML: {mlError})</p>
+        )}
       </div>
 
       <div className="p-4 space-y-4">
@@ -220,14 +306,25 @@ function MarketPricePanel({ property }: { property: Property }) {
         <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 px-3 py-2.5">
           <div className="flex items-center gap-1.5 mb-1">
             <Info className="w-3 h-3 text-emerald-700" />
-            <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Market Band for This Unit</p>
+            <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
+              {mlPrediction ? "Predicted fair rent (ML)" : "Market Band for This Unit"}
+            </p>
           </div>
           <p className="text-sm font-bold text-emerald-900">
             {fmtETB(range.recommendedMin)} – {fmtETB(range.recommendedMax)}
           </p>
+          {mlPrediction && (
+            <p className="text-xs font-semibold text-emerald-800 mt-0.5">
+              Median: {fmtETB(mlPrediction.predictedMedian)}
+            </p>
+          )}
           <p className="text-[10px] text-emerald-700 mt-0.5">
-            {range.perSqmMin}–{range.perSqmMax} ETB / m² · area factor ×{range.areaFactor}
+            {range.perSqmMin}–{range.perSqmMax} ETB / m²
+            {!mlPrediction && ` · area factor ×${range.areaFactor}`}
           </p>
+          {mlPrediction?.note && (
+            <p className="text-[10px] text-emerald-600 mt-1 leading-relaxed">{mlPrediction.note}</p>
+          )}
         </div>
 
         {/* Expandable detail */}
@@ -242,9 +339,25 @@ function MarketPricePanel({ property }: { property: Property }) {
 
         {showDetail && (
           <div className="space-y-2 text-[11px] text-stone-600 leading-relaxed border-t border-stone-100 pt-3">
-            <p><span className="font-semibold text-stone-700">Base band</span> ({property.propertyType} in {property.subCity}): <span className="font-mono">{fmtETB(range.baseMin)} – {fmtETB(range.baseMax)}</span> / month for a typical-size unit.</p>
-            <p><span className="font-semibold text-stone-700">Area adjustment</span>: ×{range.areaFactor} (√({areaSqm} ÷ reference area)) — larger units scale sub-linearly, matching Addis market behaviour.</p>
-            <p><span className="font-semibold text-stone-700">Source</span>: 2026 Addis Ababa market benchmarks. For official figures, refer to the annual DARA indicative band publication.</p>
+            {mlPrediction ? (
+              <>
+                <p>
+                  <span className="font-semibold text-stone-700">ML service</span> predicts monthly rent from sub-city, property type, {property.bedrooms} bed / {property.bathrooms} bath, {areaSqm} m², and condition ({property.homeCondition ?? "good"}).
+                </p>
+                <p>
+                  <span className="font-semibold text-stone-700">Listed vs predicted</span>: compare the landlord&apos;s {fmtETB(rent)} to the predicted band before approve/reject.
+                </p>
+                <p>
+                  <span className="font-semibold text-stone-700">Source</span>: {mlSourceLabel(mlPrediction.source)} via backend → ML microservice (port 8000).
+                </p>
+              </>
+            ) : (
+              <>
+                <p><span className="font-semibold text-stone-700">Base band</span> ({property.propertyType} in {property.subCity}): <span className="font-mono">{fmtETB(range.baseMin)} – {fmtETB(range.baseMax)}</span> / month for a typical-size unit.</p>
+                <p><span className="font-semibold text-stone-700">Area adjustment</span>: ×{range.areaFactor} (√({areaSqm} ÷ reference area)) — larger units scale sub-linearly, matching Addis market behaviour.</p>
+                <p><span className="font-semibold text-stone-700">Source</span>: 2026 Addis Ababa static benchmarks (ML service unavailable).</p>
+              </>
+            )}
           </div>
         )}
       </div>

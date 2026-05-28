@@ -335,6 +335,86 @@ export async function apiReviewProperty(
   return mapProperty(r);
 }
 
+// ─── Price prediction (ML via backend) ─────────────────────────────────────
+
+export type PricePredictionResult = {
+  predictedMin: number;
+  predictedMax: number;
+  predictedMedian: number;
+  confidence: "high" | "medium" | "low";
+  source: "model" | "rule_based";
+  currency: string;
+  note?: string;
+};
+
+const HOME_CONDITIONS = [
+  "new_build",
+  "excellent",
+  "good",
+  "fair",
+  "needs_renovation",
+] as const;
+
+function normalizeHomeCondition(value?: string): (typeof HOME_CONDITIONS)[number] {
+  const v = (value ?? "good").toLowerCase().replace(/\s+/g, "_");
+  if ((HOME_CONDITIONS as readonly string[]).includes(v)) {
+    return v as (typeof HOME_CONDITIONS)[number];
+  }
+  return "good";
+}
+
+const PROPERTY_TYPES = ["apartment", "house", "condominium", "villa"] as const;
+
+function normalizePropertyType(value: string): (typeof PROPERTY_TYPES)[number] {
+  const v = value.toLowerCase().trim();
+  if ((PROPERTY_TYPES as readonly string[]).includes(v)) {
+    return v as (typeof PROPERTY_TYPES)[number];
+  }
+  return "apartment";
+}
+
+export async function apiPredictPrice(
+  token: string,
+  property: Pick<
+    Property,
+    | "subCity"
+    | "propertyType"
+    | "bedrooms"
+    | "bathrooms"
+    | "area"
+    | "amenities"
+    | "homeCondition"
+  >,
+) {
+  const area = Number(property.area) || 0;
+  const body = {
+    subCity: property.subCity,
+    propertyType: normalizePropertyType(property.propertyType),
+    bedrooms: Math.max(1, Math.min(25, Number(property.bedrooms) || 1)),
+    bathrooms: Math.max(1, Math.min(12, Number(property.bathrooms) || 1)),
+    area: Math.max(10, area),
+    homeCondition: normalizeHomeCondition(property.homeCondition),
+    furnishing: "unfurnished",
+    amenities: property.amenities ?? [],
+  };
+
+  const raw = await apiRequest<Record<string, unknown>>("/price-prediction/predict", {
+    method: "POST",
+    token,
+    body,
+  });
+
+  return {
+    predictedMin: Number(raw.predictedMin),
+    predictedMax: Number(raw.predictedMax),
+    predictedMedian: Number(raw.predictedMedian),
+    confidence: (raw.confidence as PricePredictionResult["confidence"]) ?? "medium",
+    source: (raw.source as PricePredictionResult["source"]) ?? "rule_based",
+    currency: String(raw.currency ?? "ETB"),
+    note: raw.note ? String(raw.note) : undefined,
+  } satisfies PricePredictionResult;
+}
+
 // ─── Agreements ────────────────────────────────────────────────────────────
 
 function mapAgreement(raw: Record<string, unknown>): TenancyAgreement {
