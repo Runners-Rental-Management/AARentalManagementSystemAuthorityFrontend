@@ -13,7 +13,7 @@ export default defineConfig({
     port: 46000,
     proxy: {
       "/api-proxy": {
-        target: process.env.BACKEND_PROXY_TARGET ?? "http://127.0.0.1:3000",
+        target: process.env.BACKEND_PROXY_TARGET ?? "http://127.0.0.1:3001",
         changeOrigin: true,
         rewrite: (p) => p.replace(/^\/api-proxy/, ""),
       },
