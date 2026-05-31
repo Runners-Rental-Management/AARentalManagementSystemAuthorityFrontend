@@ -39,8 +39,8 @@ import { computeListingRange, classifyRent } from "@/lib/addis-rent-benchmarks";
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</dt>
-      <dd className="mt-0.5 text-sm font-medium text-slate-900">{value}</dd>
+      <dt className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</dt>
+      <dd className="mt-0.5 text-sm font-medium text-stone-900">{value}</dd>
     </div>
   );
 }
@@ -66,7 +66,7 @@ function MarketPricePanel({ property }: { property: Property }) {
 
   if (!range) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
+      <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-xs text-stone-500">
         Market reference unavailable for this sub-city / property type combination.
       </div>
     );
@@ -135,11 +135,11 @@ function MarketPricePanel({ property }: { property: Property }) {
   const perSqm = areaSqm > 0 ? Math.round(rent / areaSqm) : null;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+    <div className="rounded-xl border border-stone-200 bg-white overflow-hidden shadow-sm">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-700 to-violet-700 px-4 py-3.5">
+      <div className="bg-gradient-to-r from-primary-700 to-violet-700 px-4 py-3.5">
         <p className="text-white font-bold text-sm">Market Price Reference</p>
-        <p className="text-indigo-200 text-xs mt-0.5">
+        <p className="text-primary-200 text-xs mt-0.5">
           {property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1)} · {property.subCity} · {areaSqm > 0 ? `${areaSqm} m²` : "unknown area"}
         </p>
       </div>
@@ -156,20 +156,20 @@ function MarketPricePanel({ property }: { property: Property }) {
 
         {/* Listed rent */}
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-500">Listed rent</span>
-          <span className="text-base font-bold text-slate-900">{fmtETB(rent)}<span className="text-xs font-normal text-slate-500"> /mo</span></span>
+          <span className="text-xs font-medium text-stone-500">Listed rent</span>
+          <span className="text-base font-bold text-stone-900">{fmtETB(rent)}<span className="text-xs font-normal text-stone-500"> /mo</span></span>
         </div>
 
         {perSqm !== null && (
           <div className="flex items-center justify-between -mt-2">
-            <span className="text-xs font-medium text-slate-400">Per m²</span>
-            <span className="text-xs font-semibold text-slate-600">{perSqm.toLocaleString()} ETB / m²</span>
+            <span className="text-xs font-medium text-stone-400">Per m²</span>
+            <span className="text-xs font-semibold text-stone-600">{perSqm.toLocaleString()} ETB / m²</span>
           </div>
         )}
 
         {/* Visual bar */}
         <div>
-          <div className="relative h-3 rounded-full overflow-hidden bg-slate-100">
+          <div className="relative h-3 rounded-full overflow-hidden bg-stone-100">
             {/* below-band zone (sky) */}
             <div
               className="absolute top-0 bottom-0 bg-sky-100"
@@ -194,7 +194,7 @@ function MarketPricePanel({ property }: { property: Property }) {
               style={{ left: `calc(${valuePct}% - 3px)` }}
             />
           </div>
-          <div className="flex justify-between text-[10px] text-slate-400 mt-1 font-medium">
+          <div className="flex justify-between text-[10px] text-stone-400 mt-1 font-medium">
             <span>{fmtETB(range.floor)}</span>
             <span>{fmtETB(range.ceiling)}</span>
           </div>
@@ -202,17 +202,17 @@ function MarketPricePanel({ property }: { property: Property }) {
 
         {/* 3 reference cards */}
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-lg bg-slate-50 border border-slate-200 px-2 py-2">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Floor</p>
-            <p className="text-xs font-bold text-slate-700 mt-0.5">{fmtETB(range.floor)}</p>
+          <div className="rounded-lg bg-stone-50 border border-stone-200 px-2 py-2">
+            <p className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Floor</p>
+            <p className="text-xs font-bold text-stone-700 mt-0.5">{fmtETB(range.floor)}</p>
           </div>
           <div className="rounded-lg bg-emerald-50 border border-emerald-200 px-2 py-2">
             <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Typical</p>
             <p className="text-xs font-bold text-emerald-800 mt-0.5">{fmtETB(range.mid)}</p>
           </div>
-          <div className="rounded-lg bg-slate-50 border border-slate-200 px-2 py-2">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Ceiling</p>
-            <p className="text-xs font-bold text-slate-700 mt-0.5">{fmtETB(range.ceiling)}</p>
+          <div className="rounded-lg bg-stone-50 border border-stone-200 px-2 py-2">
+            <p className="text-[9px] font-bold text-stone-400 uppercase tracking-wider">Ceiling</p>
+            <p className="text-xs font-bold text-stone-700 mt-0.5">{fmtETB(range.ceiling)}</p>
           </div>
         </div>
 
@@ -234,17 +234,17 @@ function MarketPricePanel({ property }: { property: Property }) {
         <button
           type="button"
           onClick={() => setShowDetail((v) => !v)}
-          className="w-full flex items-center justify-between text-xs font-medium text-slate-500 hover:text-indigo-600 transition-colors pt-1"
+          className="w-full flex items-center justify-between text-xs font-medium text-stone-500 hover:text-primary-600 transition-colors pt-1"
         >
           <span>How is this calculated?</span>
           {showDetail ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
         </button>
 
         {showDetail && (
-          <div className="space-y-2 text-[11px] text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-            <p><span className="font-semibold text-slate-700">Base band</span> ({property.propertyType} in {property.subCity}): <span className="font-mono">{fmtETB(range.baseMin)} – {fmtETB(range.baseMax)}</span> / month for a typical-size unit.</p>
-            <p><span className="font-semibold text-slate-700">Area adjustment</span>: ×{range.areaFactor} (√({areaSqm} ÷ reference area)) — larger units scale sub-linearly, matching Addis market behaviour.</p>
-            <p><span className="font-semibold text-slate-700">Source</span>: 2026 Addis Ababa market benchmarks. For official figures, refer to the annual DARA indicative band publication.</p>
+          <div className="space-y-2 text-[11px] text-stone-600 leading-relaxed border-t border-stone-100 pt-3">
+            <p><span className="font-semibold text-stone-700">Base band</span> ({property.propertyType} in {property.subCity}): <span className="font-mono">{fmtETB(range.baseMin)} – {fmtETB(range.baseMax)}</span> / month for a typical-size unit.</p>
+            <p><span className="font-semibold text-stone-700">Area adjustment</span>: ×{range.areaFactor} (√({areaSqm} ÷ reference area)) — larger units scale sub-linearly, matching Addis market behaviour.</p>
+            <p><span className="font-semibold text-stone-700">Source</span>: 2026 Addis Ababa market benchmarks. For official figures, refer to the annual DARA indicative band publication.</p>
           </div>
         )}
       </div>
@@ -261,32 +261,32 @@ function PropertyPhotos({ images }: { images: string[] }) {
 
   if (validImages.length === 0) {
     return (
-      <div className="border-t border-slate-100 px-6 py-5">
-        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+      <div className="border-t border-stone-100 px-6 py-5">
+        <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
           <Image className="w-3.5 h-3.5" />
           Property photos
         </h2>
-        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center py-8 gap-2">
-          <Image className="w-8 h-8 text-slate-300" />
-          <p className="text-xs text-slate-400">No photos available for preview</p>
-          <p className="text-[11px] text-slate-300">Photos are stored as local previews and cannot be displayed here</p>
+        <div className="rounded-xl border border-dashed border-stone-200 bg-stone-50 flex flex-col items-center justify-center py-8 gap-2">
+          <Image className="w-8 h-8 text-stone-300" />
+          <p className="text-xs text-stone-400">No photos available for preview</p>
+          <p className="text-[11px] text-stone-300">Photos are stored as local previews and cannot be displayed here</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="border-t border-slate-100 px-6 py-5">
-      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+    <div className="border-t border-stone-100 px-6 py-5">
+      <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
         <Image className="w-3.5 h-3.5" />
         Property photos
-        <span className="ml-auto text-[10px] font-normal normal-case text-slate-400">
+        <span className="ml-auto text-[10px] font-normal normal-case text-stone-400">
           {active + 1} / {validImages.length}
         </span>
       </h2>
 
       {/* Main image */}
-      <div className="relative rounded-xl overflow-hidden bg-slate-100 aspect-video mb-2">
+      <div className="relative rounded-xl overflow-hidden bg-stone-100 aspect-video mb-2">
         <img
           src={validImages[active]}
           alt={`Property photo ${active + 1}`}
@@ -322,7 +322,7 @@ function PropertyPhotos({ images }: { images: string[] }) {
               type="button"
               onClick={() => setActive(i)}
               className={`shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                i === active ? "border-indigo-500 ring-2 ring-indigo-200" : "border-transparent opacity-60 hover:opacity-100"
+                i === active ? "border-primary-500 ring-2 ring-primary-200" : "border-transparent opacity-60 hover:opacity-100"
               }`}
             >
               <img src={url} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover" />
@@ -345,25 +345,25 @@ function formatBytes(bytes: number) {
 function OwnershipDocuments({ documents }: { documents: import("@/lib/types").PropertyDocument[] }) {
   if (documents.length === 0) {
     return (
-      <div className="border-t border-slate-100 px-6 py-5">
-        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+      <div className="border-t border-stone-100 px-6 py-5">
+        <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
           <FileText className="w-3.5 h-3.5" />
           Proof of ownership documents
         </h2>
-        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center py-6 gap-2">
-          <FileText className="w-7 h-7 text-slate-300" />
-          <p className="text-xs text-slate-400">No ownership documents uploaded</p>
+        <div className="rounded-xl border border-dashed border-stone-200 bg-stone-50 flex flex-col items-center justify-center py-6 gap-2">
+          <FileText className="w-7 h-7 text-stone-300" />
+          <p className="text-xs text-stone-400">No ownership documents uploaded</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="border-t border-slate-100 px-6 py-5">
-      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+    <div className="border-t border-stone-100 px-6 py-5">
+      <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5 mb-3">
         <FileText className="w-3.5 h-3.5" />
         Proof of ownership documents
-        <span className="ml-auto text-[10px] font-normal normal-case text-slate-400">
+        <span className="ml-auto text-[10px] font-normal normal-case text-stone-400">
           {documents.length} file{documents.length !== 1 ? "s" : ""}
         </span>
       </h2>
@@ -374,18 +374,18 @@ function OwnershipDocuments({ documents }: { documents: import("@/lib/types").Pr
           return (
             <div
               key={doc.id}
-              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+              className="flex items-center gap-3 rounded-xl border border-stone-200 bg-stone-50 px-4 py-3"
             >
-              <div className="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-lg bg-primary-100 flex items-center justify-center shrink-0">
                 {isImage ? (
-                  <Image className="w-4 h-4 text-indigo-600" />
+                  <Image className="w-4 h-4 text-primary-600" />
                 ) : (
-                  <FileText className="w-4 h-4 text-indigo-600" />
+                  <FileText className="w-4 h-4 text-primary-600" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">{doc.fileName}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">
+                <p className="text-sm font-medium text-stone-800 truncate">{doc.fileName}</p>
+                <p className="text-[11px] text-stone-500 mt-0.5">
                   {isPdf ? "PDF document" : isImage ? "Image" : doc.fileType} · {formatBytes(doc.fileSize)}
                   {doc.description && ` · ${doc.description}`}
                 </p>
@@ -394,7 +394,7 @@ function OwnershipDocuments({ documents }: { documents: import("@/lib/types").Pr
                 href={doc.storageKey}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                className="shrink-0 flex items-center gap-1 text-xs font-medium text-primary-600 hover:text-primary-800 transition-colors"
                 title="Open document"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -474,12 +474,12 @@ export function PropertyDetailPage() {
   if (!property && !loadError) {
     return (
       <div className="max-w-4xl">
-        <div className="bg-white rounded-xl border border-slate-200 p-6 animate-pulse space-y-4">
-          <div className="h-6 bg-slate-100 rounded w-1/2" />
-          <div className="h-4 bg-slate-100 rounded w-1/3" />
+        <div className="bg-white rounded-xl border border-stone-200 p-6 animate-pulse space-y-4">
+          <div className="h-6 bg-stone-100 rounded w-1/2" />
+          <div className="h-4 bg-stone-100 rounded w-1/3" />
           <div className="grid sm:grid-cols-2 gap-4 mt-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="h-10 bg-slate-100 rounded" />
+              <div key={i} className="h-10 bg-stone-100 rounded" />
             ))}
           </div>
         </div>
@@ -491,7 +491,7 @@ export function PropertyDetailPage() {
     <div className="max-w-5xl">
       <Link
         to="/properties"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-indigo-600 mb-5 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-primary-600 mb-5 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to properties
@@ -507,15 +507,15 @@ export function PropertyDetailPage() {
         /* When pending: two-column layout — property card left, market panel + review form right */
         <div className={isPending ? "grid lg:grid-cols-[1fr_340px] gap-5 items-start" : ""}>
           {/* ── Left / main column ── */}
-          <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
             {/* Header */}
-            <div className="p-6 border-b border-slate-100">
+            <div className="p-6 border-b border-stone-100">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h1 className="text-xl font-bold text-slate-900">
+                  <h1 className="text-xl font-bold text-stone-900">
                     {property.title}
                   </h1>
-                  <p className="text-slate-500 text-sm mt-0.5 flex items-center gap-1">
+                  <p className="text-stone-500 text-sm mt-0.5 flex items-center gap-1">
                     <MapPin className="w-3.5 h-3.5" />
                     {property.address}
                   </p>
@@ -525,29 +525,29 @@ export function PropertyDetailPage() {
             </div>
 
             {/* Quick stats */}
-            <div className="px-6 py-4 border-b border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <Bed className="w-4 h-4 text-slate-400" />
+            <div className="px-6 py-4 border-b border-stone-100 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="flex items-center gap-2 text-sm text-stone-600">
+                <Bed className="w-4 h-4 text-stone-400" />
                 <span>{property.bedrooms} bed{property.bedrooms !== 1 ? "s" : ""}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <Bath className="w-4 h-4 text-slate-400" />
+              <div className="flex items-center gap-2 text-sm text-stone-600">
+                <Bath className="w-4 h-4 text-stone-400" />
                 <span>{property.bathrooms} bath{property.bathrooms !== 1 ? "s" : ""}</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <Ruler className="w-4 h-4 text-slate-400" />
+              <div className="flex items-center gap-2 text-sm text-stone-600">
+                <Ruler className="w-4 h-4 text-stone-400" />
                 <span>{property.area} m²</span>
               </div>
-              <div className="flex items-center gap-2 text-sm font-semibold text-indigo-700">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary-700">
                 <Tag className="w-4 h-4" />
                 <span>{formatMoney(property.monthlyRent)}/mo</span>
               </div>
             </div>
 
             {/* Details */}
-            <div className="p-6 grid sm:grid-cols-2 gap-6 border-b border-slate-100">
+            <div className="p-6 grid sm:grid-cols-2 gap-6 border-b border-stone-100">
               <div className="space-y-4">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Home className="w-3.5 h-3.5" />
                   Property details
                 </h2>
@@ -580,7 +580,7 @@ export function PropertyDetailPage() {
               </div>
 
               <div className="space-y-4">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5" />
                   Landlord
                 </h2>
@@ -592,7 +592,7 @@ export function PropertyDetailPage() {
                       value={
                         <a
                           href={`mailto:${property.landlordEmail}`}
-                          className="flex items-center gap-1 text-indigo-600 hover:underline"
+                          className="flex items-center gap-1 text-primary-600 hover:underline"
                         >
                           <Mail className="w-3.5 h-3.5" />
                           {property.landlordEmail}
@@ -605,7 +605,7 @@ export function PropertyDetailPage() {
                       label="Phone"
                       value={
                         <span className="flex items-center gap-1">
-                          <Phone className="w-3.5 h-3.5 text-slate-400" />
+                          <Phone className="w-3.5 h-3.5 text-stone-400" />
                           {property.landlordPhone}
                         </span>
                       }
@@ -617,10 +617,10 @@ export function PropertyDetailPage() {
               {/* Description */}
               {property.description && (
                 <div className="col-span-full space-y-2">
-                  <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider">
                     Description
                   </h2>
-                  <p className="text-sm text-slate-700 leading-relaxed">
+                  <p className="text-sm text-stone-700 leading-relaxed">
                     {property.description}
                   </p>
                 </div>
@@ -629,14 +629,14 @@ export function PropertyDetailPage() {
               {/* Amenities */}
               {property.amenities.length > 0 && (
                 <div className="col-span-full space-y-2">
-                  <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                  <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider">
                     Amenities
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {property.amenities.map((a) => (
                       <span
                         key={a}
-                        className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 capitalize"
+                        className="px-2.5 py-1 rounded-full text-xs font-medium bg-stone-100 text-stone-700 capitalize"
                       >
                         {a.replace(/_/g, " ")}
                       </span>
@@ -660,20 +660,20 @@ export function PropertyDetailPage() {
               <MarketPricePanel property={property} />
 
               {/* Review form */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-                <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+              <div className="bg-white rounded-xl border border-stone-200 p-5 space-y-4">
+                <h2 className="text-sm font-semibold text-stone-800 flex items-center gap-2">
                   Authority review
                 </h2>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                  <label className="block text-xs font-medium text-stone-600 mb-1.5">
                     Rejection reason
-                    <span className="text-slate-400 ml-1">(required if rejecting)</span>
+                    <span className="text-stone-400 ml-1">(required if rejecting)</span>
                   </label>
                   <textarea
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     rows={3}
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                    className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
                     placeholder="State the reason for rejecting this property listing…"
                   />
                 </div>

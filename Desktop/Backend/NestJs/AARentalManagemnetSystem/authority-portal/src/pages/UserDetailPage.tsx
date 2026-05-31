@@ -28,9 +28,9 @@ const ROLE_COLORS: Record<string, string> = {
 
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-4 py-3 border-b border-slate-100 last:border-0">
-      <span className="w-40 flex-shrink-0 text-sm text-slate-500">{label}</span>
-      <span className="text-sm text-slate-900 font-medium">{children}</span>
+    <div className="flex items-start gap-4 py-3 border-b border-stone-100 last:border-0">
+      <span className="w-40 flex-shrink-0 text-sm text-stone-500">{label}</span>
+      <span className="text-sm text-stone-900 font-medium">{children}</span>
     </div>
   );
 }
@@ -57,7 +57,7 @@ export function UserDetailPage() {
     return (
       <div className="space-y-4">
         {[1, 2].map((i) => (
-          <div key={i} className="h-40 bg-slate-200 rounded-xl animate-pulse" />
+          <div key={i} className="h-40 bg-stone-200 rounded-xl animate-pulse" />
         ))}
       </div>
     );
@@ -67,7 +67,7 @@ export function UserDetailPage() {
     return (
       <div className="text-center py-16 text-rose-600">
         <p className="font-medium">{error ?? "User not found"}</p>
-        <Link to="/users" className="mt-3 inline-block text-indigo-600 text-sm hover:underline">
+        <Link to="/users" className="mt-3 inline-block text-primary-600 text-sm hover:underline">
           Back to users
         </Link>
       </div>
@@ -78,21 +78,21 @@ export function UserDetailPage() {
     <div>
       <Link
         to="/users"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-6 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-700 mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Back to Users
       </Link>
 
       {/* Header */}
-      <div className="bg-white border border-slate-200 rounded-xl p-6 mb-5">
+      <div className="bg-white border border-stone-200 rounded-xl p-6 mb-5">
         <div className="flex items-start gap-5">
-          <div className="w-16 h-16 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xl flex-shrink-0">
+          <div className="w-16 h-16 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xl flex-shrink-0">
             {user.firstName[0]?.toUpperCase()}
             {user.lastName[0]?.toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center flex-wrap gap-3 mb-1">
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="text-2xl font-bold text-stone-900">
                 {user.firstName} {user.lastName}
               </h1>
               <span
@@ -101,7 +101,7 @@ export function UserDetailPage() {
                 {ROLE_LABELS[user.role]}
               </span>
               {user.role === "admin" && (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-stone-100 text-stone-700">
                   {user.adminAllLocations
                     ? "All Locations"
                     : user.adminSubCities?.join(", ") || "No Location"}
@@ -113,7 +113,7 @@ export function UserDetailPage() {
                 </span>
               )}
             </div>
-            <div className="flex flex-wrap gap-4 text-sm text-slate-500 mt-2">
+            <div className="flex flex-wrap gap-4 text-sm text-stone-500 mt-2">
               <span className="flex items-center gap-1.5">
                 <Mail className="w-4 h-4" /> {user.email}
               </span>
@@ -131,13 +131,13 @@ export function UserDetailPage() {
 
       <div className="grid lg:grid-cols-2 gap-5">
         {/* Identity & Verification */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">
+        <div className="bg-white border border-stone-200 rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wide mb-4">
             Identity &amp; Verification
           </h2>
           <DetailRow label="Email Verified">
             <span
-              className={`flex items-center gap-1.5 ${user.isVerified ? "text-emerald-700" : "text-slate-400"}`}
+              className={`flex items-center gap-1.5 ${user.isVerified ? "text-emerald-700" : "text-stone-400"}`}
             >
               {user.isVerified ? (
                 <ShieldCheck className="w-4 h-4" />
@@ -149,7 +149,7 @@ export function UserDetailPage() {
           </DetailRow>
           <DetailRow label="Fayda Verified">
             <span
-              className={`flex items-center gap-1.5 ${user.faydaVerified ? "text-emerald-700" : "text-slate-400"}`}
+              className={`flex items-center gap-1.5 ${user.faydaVerified ? "text-emerald-700" : "text-stone-400"}`}
             >
               {user.faydaVerified ? (
                 <ShieldCheck className="w-4 h-4" />
@@ -180,14 +180,14 @@ export function UserDetailPage() {
         </div>
 
         {/* Activity Summary */}
-        <div className="bg-white border border-slate-200 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">
+        <div className="bg-white border border-stone-200 rounded-xl p-5">
+          <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wide mb-4">
             Activity Summary
           </h2>
           {user.role === "landlord" && (
             <DetailRow label="Properties">
               <span className="flex items-center gap-1.5">
-                <Building2 className="w-4 h-4 text-slate-400" />
+                <Building2 className="w-4 h-4 text-stone-400" />
                 {user._count?.ownedProperties ?? 0} registered
               </span>
             </DetailRow>
@@ -195,7 +195,7 @@ export function UserDetailPage() {
           {(user.role === "landlord" || user.role === "admin") && (
             <DetailRow label="Agreements (as landlord)">
               <span className="flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-slate-400" />
+                <FileText className="w-4 h-4 text-stone-400" />
                 {user._count?.agreementsAsLandlord ?? 0}
               </span>
             </DetailRow>
@@ -203,13 +203,13 @@ export function UserDetailPage() {
           {user.role === "tenant" && (
             <DetailRow label="Agreements (as tenant)">
               <span className="flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-slate-400" />
+                <FileText className="w-4 h-4 text-stone-400" />
                 {user._count?.agreementsAsTenant ?? 0}
               </span>
             </DetailRow>
           )}
           {!user._count && (
-            <p className="text-slate-400 text-sm">No activity data available.</p>
+            <p className="text-stone-400 text-sm">No activity data available.</p>
           )}
         </div>
       </div>

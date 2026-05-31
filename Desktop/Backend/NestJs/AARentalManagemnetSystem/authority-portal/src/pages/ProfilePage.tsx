@@ -17,7 +17,7 @@ function LabeledField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-600 mb-1.5">
+      <label className="block text-xs font-medium text-stone-600 mb-1.5">
         {label}
       </label>
       {children}
@@ -118,28 +118,28 @@ export function ProfilePage() {
   return (
     <div className="max-w-3xl mx-auto w-full">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">My Profile</h1>
-        <p className="text-slate-500 text-sm">
+        <h1 className="text-2xl font-bold text-stone-900 mb-1">My Profile</h1>
+        <p className="text-stone-500 text-sm">
           Manage your personal information and account details.
         </p>
       </div>
 
       {/* Avatar & role card */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-5 shadow-sm">
-        <div className="w-16 h-16 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xl flex-shrink-0 select-none">
+      <div className="bg-white border border-stone-200 rounded-2xl p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-5 shadow-sm">
+        <div className="w-16 h-16 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold text-xl flex-shrink-0 select-none">
           {user.firstName[0]?.toUpperCase()}
           {user.lastName[0]?.toUpperCase()}
         </div>
         <div>
-          <p className="font-bold text-slate-900 text-lg">
+          <p className="font-bold text-stone-900 text-lg">
             {user.firstName} {user.lastName}
           </p>
-          <p className="text-sm text-slate-500">{user.email}</p>
+          <p className="text-sm text-stone-500">{user.email}</p>
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
               {ROLE_LABELS[user.role] ?? user.role}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-700">
               {adminScopeLabel(user)}
             </span>
             {user.isVerified ? (
@@ -147,7 +147,7 @@ export function ProfilePage() {
                 <ShieldCheck className="w-3.5 h-3.5" /> Account verified
               </span>
             ) : (
-              <span className="flex items-center gap-1 text-xs text-slate-400">
+              <span className="flex items-center gap-1 text-xs text-stone-400">
                 <Shield className="w-3.5 h-3.5" /> Not verified
               </span>
             )}
@@ -158,9 +158,9 @@ export function ProfilePage() {
       {/* Edit profile form */}
       <form
         onSubmit={(e) => void handleSave(e)}
-        className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"
+        className="bg-white border border-stone-200 rounded-2xl p-5 shadow-sm"
       >
-        <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">
+        <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wide mb-4">
           Personal Information
         </h2>
         <div className="grid sm:grid-cols-2 gap-4 mb-5">
@@ -168,7 +168,7 @@ export function ProfilePage() {
             <input
               disabled
               aria-label="First name"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-400 cursor-not-allowed"
+              className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm bg-stone-50 text-stone-400 cursor-not-allowed"
               value={user.firstName}
             />
           </LabeledField>
@@ -176,7 +176,7 @@ export function ProfilePage() {
             <input
               disabled
               aria-label="Last name"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-400 cursor-not-allowed"
+              className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm bg-stone-50 text-stone-400 cursor-not-allowed"
               value={user.lastName}
             />
           </LabeledField>
@@ -184,20 +184,20 @@ export function ProfilePage() {
             <input
               disabled
               aria-label="Email address"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-400 cursor-not-allowed"
+              className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm bg-stone-50 text-stone-400 cursor-not-allowed"
               value={user.email}
             />
           </LabeledField>
           <LabeledField label="Phone (read-only)">
             <input
               disabled
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-400 cursor-not-allowed"
+              className="w-full border border-stone-200 rounded-lg px-3 py-2 text-sm bg-stone-50 text-stone-400 cursor-not-allowed"
               value={user.phone}
             />
           </LabeledField>
           <LabeledField label="Address">
             <input
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:col-span-2"
+              className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 sm:col-span-2"
               value={form.address}
               placeholder="Optional home/office address"
               onChange={(e) =>
@@ -210,12 +210,12 @@ export function ProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-60 transition-colors"
           >
             <Save className="w-4 h-4" />
             {saving ? "Saving…" : "Save changes"}
           </button>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-stone-400">
             Only address can be updated here.
           </p>
         </div>
@@ -223,15 +223,15 @@ export function ProfilePage() {
 
       <form
         onSubmit={(e) => void handlePasswordChange(e)}
-        className="mt-5 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"
+        className="mt-5 bg-white border border-stone-200 rounded-2xl p-5 shadow-sm"
       >
         <div className="flex items-center gap-2 mb-4">
-          <KeyRound className="w-4 h-4 text-indigo-600" />
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+          <KeyRound className="w-4 h-4 text-primary-600" />
+          <h2 className="text-sm font-semibold text-stone-700 uppercase tracking-wide">
             Change Password
           </h2>
         </div>
-        <p className="text-sm text-slate-500 mb-4">
+        <p className="text-sm text-stone-500 mb-4">
           Confirm your account email and current password before setting a new
           password.
         </p>
@@ -241,7 +241,7 @@ export function ProfilePage() {
               type="email"
               value={credentialEmail}
               onChange={(e) => setCredentialEmail(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </LabeledField>
           <LabeledField label="Current Password">
@@ -249,7 +249,7 @@ export function ProfilePage() {
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               autoComplete="current-password"
             />
           </LabeledField>
@@ -258,7 +258,7 @@ export function ProfilePage() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               autoComplete="new-password"
             />
           </LabeledField>
@@ -267,7 +267,7 @@ export function ProfilePage() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full border border-stone-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               autoComplete="new-password"
             />
           </LabeledField>
@@ -281,7 +281,7 @@ export function ProfilePage() {
             !newPassword ||
             !confirmPassword
           }
-          className="inline-flex items-center gap-2 px-4 py-2 border border-indigo-200 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 border border-primary-200 text-primary-700 text-sm font-medium rounded-lg hover:bg-primary-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
         >
           <KeyRound className="w-4 h-4" />
           {changingPassword ? "Updating..." : "Update password"}

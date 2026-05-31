@@ -11,7 +11,7 @@ const STYLES: Record<string, StyleDef> = {
   pending_verification: { bg: "bg-amber-50", text: "text-amber-800", dot: "bg-amber-400", ring: "ring-amber-200" },
   pending_dara_verification: { bg: "bg-violet-50", text: "text-violet-800", dot: "bg-violet-400", ring: "ring-violet-200" },
   pending_payment: { bg: "bg-amber-50", text: "text-amber-800", dot: "bg-amber-400", ring: "ring-amber-200" },
-  extension_requested: { bg: "bg-indigo-50", text: "text-indigo-800", dot: "bg-indigo-400", ring: "ring-indigo-200" },
+  extension_requested: { bg: "bg-primary-50", text: "text-primary-800", dot: "bg-primary-400", ring: "ring-primary-200" },
   termination_requested: { bg: "bg-rose-50", text: "text-rose-800", dot: "bg-rose-400", ring: "ring-rose-200" },
   pending_tenant_signature: { bg: "bg-orange-50", text: "text-orange-800", dot: "bg-orange-400", ring: "ring-orange-200" },
   pending: { bg: "bg-amber-50", text: "text-amber-800", dot: "bg-amber-400", ring: "ring-amber-200" },
@@ -24,12 +24,12 @@ const STYLES: Record<string, StyleDef> = {
   approved: { bg: "bg-emerald-50", text: "text-emerald-800", dot: "bg-emerald-400", ring: "ring-emerald-200" },
   available: { bg: "bg-emerald-50", text: "text-emerald-800", dot: "bg-emerald-400", ring: "ring-emerald-200" },
   rejected: { bg: "bg-rose-50", text: "text-rose-800", dot: "bg-rose-400", ring: "ring-rose-200" },
-  resolved: { bg: "bg-slate-50", text: "text-slate-700", dot: "bg-slate-400", ring: "ring-slate-200" },
-  closed: { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-300", ring: "ring-slate-200" },
-  terminated: { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-300", ring: "ring-slate-200" },
-  expired: { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-300", ring: "ring-slate-200" },
-  draft: { bg: "bg-slate-50", text: "text-slate-600", dot: "bg-slate-300", ring: "ring-slate-200" },
-  rented: { bg: "bg-indigo-50", text: "text-indigo-800", dot: "bg-indigo-400", ring: "ring-indigo-200" },
+  resolved: { bg: "bg-stone-50", text: "text-stone-700", dot: "bg-stone-400", ring: "ring-stone-200" },
+  closed: { bg: "bg-stone-50", text: "text-stone-600", dot: "bg-stone-300", ring: "ring-stone-200" },
+  terminated: { bg: "bg-stone-50", text: "text-stone-600", dot: "bg-stone-300", ring: "ring-stone-200" },
+  expired: { bg: "bg-stone-50", text: "text-stone-600", dot: "bg-stone-300", ring: "ring-stone-200" },
+  draft: { bg: "bg-stone-50", text: "text-stone-600", dot: "bg-stone-300", ring: "ring-stone-200" },
+  rented: { bg: "bg-primary-50", text: "text-primary-800", dot: "bg-primary-400", ring: "ring-primary-200" },
   critical: { bg: "bg-red-50", text: "text-red-800", dot: "bg-red-500", ring: "ring-red-200" },
   high: { bg: "bg-orange-50", text: "text-orange-800", dot: "bg-orange-400", ring: "ring-orange-200" },
   medium: { bg: "bg-amber-50", text: "text-amber-800", dot: "bg-amber-400", ring: "ring-amber-200" },
@@ -37,10 +37,10 @@ const STYLES: Record<string, StyleDef> = {
 };
 
 const DEFAULT_STYLE: StyleDef = {
-  bg: "bg-slate-50",
-  text: "text-slate-600",
-  dot: "bg-slate-300",
-  ring: "ring-slate-200",
+  bg: "bg-stone-50",
+  text: "text-stone-600",
+  dot: "bg-stone-300",
+  ring: "ring-stone-200",
 };
 
 export function StatusBadge({

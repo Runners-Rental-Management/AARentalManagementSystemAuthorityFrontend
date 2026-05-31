@@ -70,10 +70,10 @@ function ChartCard({ title, subtitle, children, className = "" }: {
   className?: string;
 }) {
   return (
-    <div className={`bg-white border border-slate-200 rounded-2xl p-5 ${className}`}>
+    <div className={`bg-white border border-stone-200 rounded-2xl p-5 ${className}`}>
       <div className="mb-4">
-        <h3 className="font-semibold text-slate-900">{title}</h3>
-        {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+        <h3 className="font-semibold text-stone-900">{title}</h3>
+        {subtitle && <p className="text-xs text-stone-500 mt-0.5">{subtitle}</p>}
       </div>
       {children}
     </div>
@@ -92,7 +92,7 @@ function KpiCard({ label, value, sub, icon: Icon, color, to, trend }: {
   return (
     <Link
       to={to}
-      className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-indigo-300 hover:shadow-md transition-all group flex flex-col gap-3"
+      className="bg-white rounded-2xl border border-stone-200 p-5 hover:border-primary-300 hover:shadow-md transition-all group flex flex-col gap-3"
     >
       <div className="flex items-center justify-between">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
@@ -105,9 +105,9 @@ function KpiCard({ label, value, sub, icon: Icon, color, to, trend }: {
         )}
       </div>
       <div>
-        <p className="text-3xl font-bold text-slate-900 leading-none">{value}</p>
-        <p className="text-sm text-slate-500 mt-1 group-hover:text-slate-700 transition-colors">{label}</p>
-        {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+        <p className="text-3xl font-bold text-stone-900 leading-none">{value}</p>
+        <p className="text-sm text-stone-500 mt-1 group-hover:text-stone-700 transition-colors">{label}</p>
+        {sub && <p className="text-xs text-stone-400 mt-0.5">{sub}</p>}
       </div>
     </Link>
   );
@@ -120,8 +120,8 @@ function CustomTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-slate-900 text-white text-xs rounded-xl px-3 py-2 shadow-xl">
-      {label && <p className="font-semibold mb-1 text-slate-300">{label}</p>}
+    <div className="bg-stone-900 text-white text-xs rounded-xl px-3 py-2 shadow-xl">
+      {label && <p className="font-semibold mb-1 text-stone-300">{label}</p>}
       {payload.map((p) => (
         <p key={p.name} style={{ color: p.color }}>
           {p.name}: <span className="font-bold text-white">{p.value}</span>
@@ -188,7 +188,7 @@ export function DashboardPage() {
     : null;
 
   const SkeletonBlock = ({ h = "h-64" }: { h?: string }) => (
-    <div className={`${h} bg-slate-200 rounded-2xl animate-pulse`} />
+    <div className={`${h} bg-stone-200 rounded-2xl animate-pulse`} />
   );
 
   return (
@@ -196,10 +196,10 @@ export function DashboardPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-stone-900">
             Welcome back, {user?.firstName}
           </h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-stone-500 text-sm mt-1">
             Addis Ababa Rental Authority — Operations Overview
           </p>
         </div>
@@ -207,9 +207,9 @@ export function DashboardPage() {
           type="button"
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm border border-stone-200 bg-white hover:bg-stone-50 disabled:opacity-50 transition-colors shadow-sm"
         >
-          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-indigo-500" : "text-slate-500"}`} />
+          <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-primary-500" : "text-stone-500"}`} />
           Refresh
         </button>
       </div>
@@ -261,7 +261,7 @@ export function DashboardPage() {
             value={stats.overview.totalAgreements}
             sub="All time"
             icon={FileCheck}
-            color="text-indigo-600 bg-indigo-50"
+            color="text-primary-600 bg-primary-50"
             to="/agreements"
             trend={stats.overview.recentAgreements}
           />
@@ -285,7 +285,7 @@ export function DashboardPage() {
               value: actionStats.pendingAgreements,
               to: "/agreements?status=pending_verification",
               icon: FileCheck,
-              color: "text-indigo-600 bg-indigo-50",
+              color: "text-primary-600 bg-primary-50",
               urgent: actionStats.pendingAgreements > 0,
             },
             {
@@ -293,7 +293,7 @@ export function DashboardPage() {
               value: actionStats.pendingExtensions,
               to: "/agreements?status=extension_requested",
               icon: RefreshCw,
-              color: "text-indigo-600 bg-indigo-50",
+              color: "text-primary-600 bg-primary-50",
               urgent: actionStats.pendingExtensions > 0,
             },
             {
@@ -324,14 +324,14 @@ export function DashboardPage() {
             <Link
               key={to}
               to={to}
-              className={`bg-white border rounded-xl p-4 hover:shadow-md transition-all flex items-center gap-3 ${urgent ? "border-amber-200 hover:border-amber-300" : "border-slate-200 hover:border-slate-300"}`}
+              className={`bg-white border rounded-xl p-4 hover:shadow-md transition-all flex items-center gap-3 ${urgent ? "border-amber-200 hover:border-amber-300" : "border-stone-200 hover:border-stone-300"}`}
             >
               <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${color}`}>
                 <Icon className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <p className="text-xl font-bold text-slate-900">{value}</p>
-                <p className="text-xs text-slate-500 truncate">{label}</p>
+                <p className="text-xl font-bold text-stone-900">{value}</p>
+                <p className="text-xs text-stone-500 truncate">{label}</p>
               </div>
               {urgent && value > 0 && (
                 <div className="ml-auto w-2 h-2 rounded-full bg-amber-400 shrink-0" />
@@ -523,9 +523,9 @@ export function DashboardPage() {
 
       {/* Quick actions */}
       {!loading && (
-        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-2xl p-6 text-white">
+        <div className="bg-primary-700 rounded-2xl p-6 text-white">
           <div className="flex items-center gap-3 mb-4">
-            <Activity className="w-5 h-5 text-indigo-200" />
+            <Activity className="w-5 h-5 text-primary-200" />
             <h3 className="font-semibold">Quick Actions</h3>
           </div>
           <div className="grid sm:grid-cols-3 gap-3">

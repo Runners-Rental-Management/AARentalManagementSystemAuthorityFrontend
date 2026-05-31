@@ -86,14 +86,14 @@ export function NotificationsPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-        <Bell className="w-5 h-5 text-indigo-600" />
+      <h1 className="text-xl font-bold text-stone-900 mb-6 flex items-center gap-2">
+        <Bell className="w-5 h-5 text-primary-600" />
         Notifications
       </h1>
 
       {loading ? (
         <div className="flex justify-center py-20">
-          <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
         </div>
       ) : (
         <>
@@ -106,8 +106,8 @@ export function NotificationsPage() {
                   onClick={() => setFilter(f)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     filter === f
-                      ? "bg-indigo-100 text-indigo-700"
-                      : "text-slate-500 hover:bg-slate-100"
+                      ? "bg-primary-100 text-primary-700"
+                      : "text-stone-500 hover:bg-stone-100"
                   }`}
                 >
                   {f === "all" ? `All (${items.length})` : `Unread (${unreadCount})`}
@@ -117,7 +117,7 @@ export function NotificationsPage() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                className="inline-flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-medium"
               >
                 <Check className="w-4 h-4" />
                 Mark all read
@@ -130,8 +130,8 @@ export function NotificationsPage() {
             {filtered.map((n) => (
               <div
                 key={n.id}
-                className={`bg-white rounded-xl border p-4 flex items-start gap-4 transition-colors cursor-pointer hover:border-indigo-200 ${
-                  n.isRead ? "border-slate-200" : "border-indigo-200 bg-indigo-50/30"
+                className={`bg-white rounded-xl border p-4 flex items-start gap-4 transition-colors cursor-pointer hover:border-primary-200 ${
+                  n.isRead ? "border-stone-200" : "border-primary-200 bg-primary-50/30"
                 }`}
                 onClick={() => handleClick(n)}
               >
@@ -140,25 +140,25 @@ export function NotificationsPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className={`text-sm ${n.isRead ? "text-slate-700" : "text-slate-900 font-semibold"}`}>
+                    <h3 className={`text-sm ${n.isRead ? "text-stone-700" : "text-stone-900 font-semibold"}`}>
                       {n.title}
                     </h3>
-                    <span className="text-xs text-slate-400 shrink-0">
+                    <span className="text-xs text-stone-400 shrink-0">
                       {formatTimeAgo(n.createdAt)}
                     </span>
                   </div>
-                  <p className="text-sm text-slate-500 mt-0.5">{n.message}</p>
+                  <p className="text-sm text-stone-500 mt-0.5">{n.message}</p>
                   {!n.isRead && (
                     <button
                       onClick={(e) => { e.stopPropagation(); void markRead(n.id); }}
-                      className="mt-2 text-xs text-slate-400 hover:text-slate-600"
+                      className="mt-2 text-xs text-stone-400 hover:text-stone-600"
                     >
                       Mark as read
                     </button>
                   )}
                 </div>
                 {!n.isRead && (
-                  <div className="shrink-0 w-2 h-2 rounded-full bg-indigo-500 mt-2" />
+                  <div className="shrink-0 w-2 h-2 rounded-full bg-primary-500 mt-2" />
                 )}
               </div>
             ))}
@@ -166,8 +166,8 @@ export function NotificationsPage() {
 
           {filtered.length === 0 && (
             <div className="text-center py-16">
-              <Bell className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-              <p className="text-slate-500 text-sm">No notifications</p>
+              <Bell className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+              <p className="text-stone-500 text-sm">No notifications</p>
             </div>
           )}
         </>
