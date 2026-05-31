@@ -18,16 +18,12 @@ const ROLE_LABELS: Record<string, string> = {
   tenant: "Tenant",
   landlord: "Landlord",
   admin: "Admin",
-  dara_agent: "DARA Agent",
-  system_admin: "System Admin",
 };
 
 const ROLE_COLORS: Record<string, string> = {
   tenant: "bg-sky-100 text-sky-800",
   landlord: "bg-amber-100 text-amber-800",
   admin: "bg-violet-100 text-violet-800",
-  dara_agent: "bg-indigo-100 text-indigo-800",
-  system_admin: "bg-rose-100 text-rose-800",
 };
 
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
@@ -100,10 +96,17 @@ export function UserDetailPage() {
                 {user.firstName} {user.lastName}
               </h1>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${ROLE_COLORS[user.role]}`}
+                className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${ROLE_COLORS[user.role] ?? ROLE_COLORS.admin}`}
               >
                 {ROLE_LABELS[user.role]}
               </span>
+              {user.role === "admin" && (
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                  {user.adminAllLocations
+                    ? "All Locations"
+                    : user.adminSubCities?.join(", ") || "No Location"}
+                </span>
+              )}
               {isLocked && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700">
                   <Lock className="w-3 h-3" /> Locked
@@ -189,7 +192,7 @@ export function UserDetailPage() {
               </span>
             </DetailRow>
           )}
-          {(user.role === "landlord" || user.role === "admin" || user.role === "system_admin" || user.role === "dara_agent") && (
+          {(user.role === "landlord" || user.role === "admin") && (
             <DetailRow label="Agreements (as landlord)">
               <span className="flex items-center gap-1.5">
                 <FileText className="w-4 h-4 text-slate-400" />
@@ -203,11 +206,6 @@ export function UserDetailPage() {
                 <FileText className="w-4 h-4 text-slate-400" />
                 {user._count?.agreementsAsTenant ?? 0}
               </span>
-            </DetailRow>
-          )}
-          {user._count?.reportedDisputes !== undefined && (
-            <DetailRow label="Disputes reported">
-              {user._count.reportedDisputes}
             </DetailRow>
           )}
           {!user._count && (

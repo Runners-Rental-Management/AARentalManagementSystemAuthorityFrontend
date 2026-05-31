@@ -5,6 +5,8 @@ import { StatusBadge } from "@/components/StatusBadge";
 import {
   apiGetAgreement,
   apiReviewAgreement,
+  apiReviewExtensionRequest,
+  apiReviewTerminationRequest,
   getAccessToken,
 } from "@/lib/api";
 import { getErrorMessage } from "@/lib/api-error";
@@ -39,9 +41,9 @@ export function AgreementDetailPage() {
       .catch((e) => setError(getErrorMessage(e)));
   }, [id]);
 
-  const isPendingVerification =
-    agreement?.status === "pending_verification" ||
-    agreement?.status === "pending_dara_verification";
+  const isPendingVerification = agreement?.status === "pending_verification";
+  const isTerminationRequested = agreement?.status === "termination_requested";
+  const isExtensionRequested = agreement?.status === "extension_requested";
 
   const review = async (status: "active" | "rejected") => {
     const token = getAccessToken();
@@ -59,10 +61,51 @@ export function AgreementDetailPage() {
       });
       toast.success(
         status === "active"
-          ? "Agreement approved and activated."
+          ? "Agreement verified. Tenant will be notified to pay advance rent."
           : "Agreement rejected.",
       );
       navigate("/agreements?status=pending_verification");
+    } catch (e) {
+      setError(getErrorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const reviewPending = async (approved: boolean) => {
+    const token = getAccessToken();
+    if (!token || !id) return;
+    if (!approved && reason.trim().length < 3) {
+      setError("Provide a rejection reason (min 3 characters).");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = isExtensionRequested
+        ? await apiReviewExtensionRequest(token, id, {
+            approved,
+            reason: approved ? undefined : reason.trim(),
+          })
+        : await apiReviewTerminationRequest(token, id, {
+            approved,
+            reason: approved ? undefined : reason.trim(),
+          });
+      setAgreement(updated);
+      toast.success(
+        approved
+          ? isExtensionRequested
+            ? "Extension approved."
+            : "Termination approved."
+          : isExtensionRequested
+            ? "Extension request rejected."
+            : "Termination request rejected.",
+      );
+      navigate(
+        isExtensionRequested
+          ? "/agreements?status=extension_requested"
+          : "/agreements?status=termination_requested",
+      );
     } catch (e) {
       setError(getErrorMessage(e));
     } finally {
@@ -210,16 +253,31 @@ export function AgreementDetailPage() {
             {agreement.terminationReason && (
               <div className="col-span-full">
                 <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                  Termination / rejection reason
+                  {isExtensionRequested ? "Extension note" : "Termination / rejection reason"}
                 </h2>
                 <p className="text-sm text-slate-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
                   {agreement.terminationReason}
                 </p>
               </div>
             )}
+
+            {isExtensionRequested && agreement.proposedEndDate && (
+              <div className="col-span-full grid sm:grid-cols-2 gap-4">
+                <DetailRow
+                  label="Proposed end date"
+                  value={formatDate(agreement.proposedEndDate)}
+                />
+                {agreement.proposedMonthlyRent != null && (
+                  <DetailRow
+                    label="Proposed monthly rent"
+                    value={formatMoney(agreement.proposedMonthlyRent)}
+                  />
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Review actions */}
+          {/* Initial verification */}
           {isPendingVerification && (
             <div className="p-6 border-t border-slate-100 bg-slate-50 space-y-4">
               <h2 className="text-sm font-semibold text-slate-700">
@@ -252,12 +310,58 @@ export function AgreementDetailPage() {
                   onClick={() => review("active")}
                   className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
                 >
-                  {busy ? "Processing…" : "Approve & Activate"}
+                  {busy ? "Processing…" : "Approve (awaiting payment)"}
                 </button>
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => review("rejected")}
+                  className="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
+                >
+                  {busy ? "Processing…" : "Reject"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {(isTerminationRequested || isExtensionRequested) && (
+            <div className="p-6 border-t border-slate-100 bg-slate-50 space-y-4">
+              <h2 className="text-sm font-semibold text-slate-700">
+                {isExtensionRequested ? "Review extension request" : "Review termination request"}
+              </h2>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                  Rejection reason
+                  <span className="text-slate-400 ml-1">(required if rejecting)</span>
+                </label>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                  placeholder="Explain why the request is being rejected…"
+                />
+              </div>
+
+              {error && (
+                <div className="px-3 py-2 rounded-lg bg-rose-50 border border-rose-200 text-sm text-rose-700">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => reviewPending(true)}
+                  className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
+                >
+                  {busy ? "Processing…" : "Approve"}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => reviewPending(false)}
                   className="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
                 >
                   {busy ? "Processing…" : "Reject"}

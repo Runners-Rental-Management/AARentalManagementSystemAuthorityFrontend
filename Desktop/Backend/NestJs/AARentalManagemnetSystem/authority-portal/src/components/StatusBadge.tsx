@@ -10,6 +10,9 @@ interface StyleDef {
 const STYLES: Record<string, StyleDef> = {
   pending_verification: { bg: "bg-amber-50", text: "text-amber-800", dot: "bg-amber-400", ring: "ring-amber-200" },
   pending_dara_verification: { bg: "bg-violet-50", text: "text-violet-800", dot: "bg-violet-400", ring: "ring-violet-200" },
+  pending_payment: { bg: "bg-amber-50", text: "text-amber-800", dot: "bg-amber-400", ring: "ring-amber-200" },
+  extension_requested: { bg: "bg-indigo-50", text: "text-indigo-800", dot: "bg-indigo-400", ring: "ring-indigo-200" },
+  termination_requested: { bg: "bg-rose-50", text: "text-rose-800", dot: "bg-rose-400", ring: "ring-rose-200" },
   pending_tenant_signature: { bg: "bg-orange-50", text: "text-orange-800", dot: "bg-orange-400", ring: "ring-orange-200" },
   pending: { bg: "bg-amber-50", text: "text-amber-800", dot: "bg-amber-400", ring: "ring-amber-200" },
   under_review: { bg: "bg-sky-50", text: "text-sky-800", dot: "bg-sky-400", ring: "ring-sky-200" },

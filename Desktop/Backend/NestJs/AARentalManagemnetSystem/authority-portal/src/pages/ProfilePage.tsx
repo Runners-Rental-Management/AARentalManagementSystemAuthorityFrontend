@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
-import { Save, Shield, ShieldCheck } from "lucide-react";
+import { KeyRound, Save, Shield, ShieldCheck } from "lucide-react";
 import { useToast } from "@/components/Toast";
 import { useAuth } from "@/context/AuthContext";
-import { apiUpdateMe, getAccessToken } from "@/lib/api";
+import { apiChangePassword, apiUpdateMe, getAccessToken } from "@/lib/api";
 
 interface ProfileForm {
-  firstName: string;
-  lastName: string;
-  phone: string;
   address: string;
 }
 
@@ -32,30 +29,33 @@ const ROLE_LABELS: Record<string, string> = {
   tenant: "Tenant",
   landlord: "Landlord",
   admin: "Admin",
-  dara_agent: "DARA Agent",
-  system_admin: "System Admin",
 };
+
+function adminScopeLabel(user: { adminAllLocations?: boolean; adminSubCities?: string[] }) {
+  if (user.adminAllLocations) return "All Locations Admin";
+  return `${user.adminSubCities?.join(", ") || "No Location"} Admin`;
+}
 
 export function ProfilePage() {
   const { user, refreshUser } = useAuth();
   const { success, error: toastError } = useToast();
 
   const [form, setForm] = useState<ProfileForm>({
-    firstName: user?.firstName ?? "",
-    lastName: user?.lastName ?? "",
-    phone: user?.phone ?? "",
-    address: "",
+    address: user?.address ?? "",
   });
   const [saving, setSaving] = useState(false);
+  const [credentialEmail, setCredentialEmail] = useState(user?.email ?? "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
       setForm({
-        firstName: user.firstName,
-        lastName: user.lastName,
-        phone: user.phone,
-        address: "",
+        address: user.address ?? "",
       });
+      setCredentialEmail(user.email);
     }
   }, [user]);
 
@@ -63,16 +63,9 @@ export function ProfilePage() {
     e.preventDefault();
     const token = getAccessToken();
     if (!token) return;
-    if (!form.firstName.trim() || !form.lastName.trim()) {
-      toastError("First and last name are required");
-      return;
-    }
     setSaving(true);
     try {
       await apiUpdateMe(token, {
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        phone: form.phone.trim() || undefined,
         address: form.address.trim() || undefined,
       });
       await refreshUser();
@@ -84,10 +77,46 @@ export function ProfilePage() {
     }
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    const token = getAccessToken();
+    if (!token) return;
+    if (credentialEmail.trim().toLowerCase() !== user.email.toLowerCase()) {
+      toastError("Email credential must match your account email");
+      return;
+    }
+    if (newPassword.length < 8) {
+      toastError("New password must be at least 8 characters");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toastError("New password and confirmation do not match");
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      await apiChangePassword(token, {
+        email: credentialEmail,
+        currentPassword,
+        newPassword,
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      success("Password updated successfully");
+    } catch (e) {
+      toastError(e instanceof Error ? e.message : "Failed to update password");
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
   if (!user) return null;
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-3xl mx-auto w-full">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900 mb-1">My Profile</h1>
         <p className="text-slate-500 text-sm">
@@ -96,7 +125,7 @@ export function ProfilePage() {
       </div>
 
       {/* Avatar & role card */}
-      <div className="bg-white border border-slate-200 rounded-xl p-5 mb-5 flex items-center gap-5">
+      <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-5 flex flex-col sm:flex-row sm:items-center gap-5 shadow-sm">
         <div className="w-16 h-16 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xl flex-shrink-0 select-none">
           {user.firstName[0]?.toUpperCase()}
           {user.lastName[0]?.toUpperCase()}
@@ -109,6 +138,9 @@ export function ProfilePage() {
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
               {ROLE_LABELS[user.role] ?? user.role}
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+              {adminScopeLabel(user)}
             </span>
             {user.isVerified ? (
               <span className="flex items-center gap-1 text-xs text-emerald-700">
@@ -126,34 +158,26 @@ export function ProfilePage() {
       {/* Edit profile form */}
       <form
         onSubmit={(e) => void handleSave(e)}
-        className="bg-white border border-slate-200 rounded-xl p-5"
+        className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"
       >
         <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-4">
           Personal Information
         </h2>
         <div className="grid sm:grid-cols-2 gap-4 mb-5">
-          <LabeledField label="First Name *">
+          <LabeledField label="First Name (read-only)">
             <input
-              required
+              disabled
               aria-label="First name"
-              placeholder="First name"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              value={form.firstName}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, firstName: e.target.value }))
-              }
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-400 cursor-not-allowed"
+              value={user.firstName}
             />
           </LabeledField>
-          <LabeledField label="Last Name *">
+          <LabeledField label="Last Name (read-only)">
             <input
-              required
+              disabled
               aria-label="Last name"
-              placeholder="Last name"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              value={form.lastName}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, lastName: e.target.value }))
-              }
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-400 cursor-not-allowed"
+              value={user.lastName}
             />
           </LabeledField>
           <LabeledField label="Email (read-only)">
@@ -164,14 +188,11 @@ export function ProfilePage() {
               value={user.email}
             />
           </LabeledField>
-          <LabeledField label="Phone">
+          <LabeledField label="Phone (read-only)">
             <input
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              value={form.phone}
-              placeholder="e.g. +251 911 000 000"
-              onChange={(e) =>
-                setForm((f) => ({ ...f, phone: e.target.value }))
-              }
+              disabled
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-400 cursor-not-allowed"
+              value={user.phone}
             />
           </LabeledField>
           <LabeledField label="Address">
@@ -195,9 +216,76 @@ export function ProfilePage() {
             {saving ? "Saving…" : "Save changes"}
           </button>
           <p className="text-xs text-slate-400">
-            To change your password, contact a system administrator.
+            Only address can be updated here.
           </p>
         </div>
+      </form>
+
+      <form
+        onSubmit={(e) => void handlePasswordChange(e)}
+        className="mt-5 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <KeyRound className="w-4 h-4 text-indigo-600" />
+          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+            Change Password
+          </h2>
+        </div>
+        <p className="text-sm text-slate-500 mb-4">
+          Confirm your account email and current password before setting a new
+          password.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-4 mb-5">
+          <LabeledField label="Account Email Credential">
+            <input
+              type="email"
+              value={credentialEmail}
+              onChange={(e) => setCredentialEmail(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </LabeledField>
+          <LabeledField label="Current Password">
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              autoComplete="current-password"
+            />
+          </LabeledField>
+          <LabeledField label="New Password">
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              autoComplete="new-password"
+            />
+          </LabeledField>
+          <LabeledField label="Confirm New Password">
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              autoComplete="new-password"
+            />
+          </LabeledField>
+        </div>
+        <button
+          type="submit"
+          disabled={
+            changingPassword ||
+            !credentialEmail.trim() ||
+            !currentPassword ||
+            !newPassword ||
+            !confirmPassword
+          }
+          className="inline-flex items-center gap-2 px-4 py-2 border border-indigo-200 text-indigo-700 text-sm font-medium rounded-lg hover:bg-indigo-50 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        >
+          <KeyRound className="w-4 h-4" />
+          {changingPassword ? "Updating..." : "Update password"}
+        </button>
       </form>
     </div>
   );

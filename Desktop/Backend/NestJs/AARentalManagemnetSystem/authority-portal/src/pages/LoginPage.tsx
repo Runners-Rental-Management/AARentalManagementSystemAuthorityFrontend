@@ -1,19 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Eye, EyeOff, Lock, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getErrorMessage } from "@/lib/api-error";
-import type { AuthorityRole } from "@/lib/types";
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, user, loading } = useAuth();
   const navigate = useNavigate();
-  const [role, setRole] = useState<AuthorityRole>("system_admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/", { replace: true });
+    }
+  }, [loading, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +28,7 @@ export function LoginPage() {
     }
     setBusy(true);
     try {
-      await login({ role, email: email.trim(), password });
+      await login({ role: "admin", email: email.trim(), password });
       navigate("/", { replace: true });
     } catch (err) {
       setError(getErrorMessage(err));
@@ -67,18 +71,14 @@ export function LoginPage() {
             <span className="font-semibold">Official sign in</span>
           </div>
 
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Role
-          </label>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as AuthorityRole)}
-            className="w-full mb-4 px-3 py-2.5 rounded-lg border border-slate-300 text-sm"
-          >
-            <option value="dara_agent">DARA Officer</option>
-            <option value="admin">Government Admin</option>
-            <option value="system_admin">System Administrator</option>
-          </select>
+          <div className="mb-4 rounded-xl border border-indigo-100 bg-indigo-50 px-3 py-2.5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+              Role
+            </p>
+            <p className="text-sm font-medium text-slate-800">
+              Location-based Admin
+            </p>
+          </div>
 
           <label className="block text-sm font-medium text-slate-700 mb-1">
             Official email
@@ -114,7 +114,7 @@ export function LoginPage() {
 
           <p className="text-xs text-slate-500 mb-4 flex items-center gap-1">
             <Lock className="w-3 h-3" />
-            Demo: admin@aarental.local / Passw0rd!234
+            Demo: admin@aarental.local or admin-bole@aarental.local / Passw0rd!234
           </p>
 
           {error && (

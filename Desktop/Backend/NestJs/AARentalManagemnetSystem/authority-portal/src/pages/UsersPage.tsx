@@ -20,24 +20,18 @@ const ROLE_LABELS: Record<PlatformRole, string> = {
   tenant: "Tenant",
   landlord: "Landlord",
   admin: "Admin",
-  dara_agent: "DARA Agent",
-  system_admin: "System Admin",
 };
 
 const ROLE_COLORS: Record<PlatformRole, string> = {
   tenant: "bg-sky-100 text-sky-800",
   landlord: "bg-amber-100 text-amber-800",
   admin: "bg-violet-100 text-violet-800",
-  dara_agent: "bg-indigo-100 text-indigo-800",
-  system_admin: "bg-rose-100 text-rose-800",
 };
 
 const ALL_ROLES: PlatformRole[] = [
   "tenant",
   "landlord",
   "admin",
-  "dara_agent",
-  "system_admin",
 ];
 
 function RoleBadge({ role }: { role: PlatformRole }) {
@@ -101,10 +95,17 @@ function UserRow({ user }: { user: PlatformUser }) {
               {user._count?.ownedProperties ?? 0} props
             </span>
           )}
-          {(user.role === "landlord" || user.role === "admin" || user.role === "system_admin" || user.role === "dara_agent") && (
+          {(user.role === "landlord" || user.role === "admin") && (
             <span className="flex items-center gap-1">
               <FileText className="w-3 h-3" />
               {user._count?.agreementsAsLandlord ?? 0} agreements
+            </span>
+          )}
+          {user.role === "admin" && (
+            <span className="text-slate-400">
+              {user.adminAllLocations
+                ? "All locations"
+                : `${user.adminSubCities?.join(", ") || "No location"} scope`}
             </span>
           )}
           {user.role === "tenant" && (

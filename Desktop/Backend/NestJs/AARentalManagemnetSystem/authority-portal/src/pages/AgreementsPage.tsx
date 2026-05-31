@@ -9,7 +9,9 @@ import { formatDate, formatMoney } from "@/lib/utils";
 
 const STATUSES: [string, string][] = [
   ["pending_verification", "Pending verification"],
-  ["pending_dara_verification", "DARA verification"],
+  ["pending_payment", "Pending payment"],
+  ["extension_requested", "Extension requested"],
+  ["termination_requested", "Termination requested"],
   ["active", "Active"],
   ["extended", "Extended"],
   ["terminated", "Terminated"],
@@ -37,7 +39,11 @@ function SkeletonRow() {
 
 export function AgreementsPage() {
   const [params, setParams] = useSearchParams();
-  const status = params.get("status") ?? "pending_verification";
+  const rawStatus = params.get("status");
+  const status =
+    rawStatus === "pending_dara_verification"
+      ? "pending_verification"
+      : rawStatus ?? "pending_verification";
   const currentPage = Number(params.get("page") ?? "1");
   const search = params.get("search") ?? "";
 
@@ -45,6 +51,14 @@ export function AgreementsPage() {
   const [meta, setMeta] = useState({ total: 0, totalPages: 1, page: 1, pageSize: PAGE_SIZE });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (params.get("status") === "pending_dara_verification") {
+      const next = new URLSearchParams(params);
+      next.set("status", "pending_verification");
+      setParams(next, { replace: true });
+    }
+  }, [params, setParams]);
 
   useEffect(() => {
     const token = getAccessToken();
@@ -64,8 +78,10 @@ export function AgreementsPage() {
   }, [status, currentPage, search]);
 
   function setStatus(s: string) {
-    const next = new URLSearchParams();
-    if (s !== "all") next.set("status", s);
+    const next = new URLSearchParams(params);
+    next.delete("page");
+    if (s === "all") next.set("status", "all");
+    else next.set("status", s);
     setParams(next);
   }
 
@@ -77,7 +93,7 @@ export function AgreementsPage() {
     setParams(next);
   }
 
-  const isAllStatus = !params.get("status") || status === "all";
+  const isAllStatus = status === "all";
 
   return (
     <div className="space-y-5">
@@ -100,11 +116,11 @@ export function AgreementsPage() {
           <input
             type="search"
             placeholder="Search property, landlord or tenant…"
-            defaultValue={search}
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") handleSearch((e.target as HTMLInputElement).value);
             }}
-            onBlur={(e) => handleSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50"
           />
         </div>

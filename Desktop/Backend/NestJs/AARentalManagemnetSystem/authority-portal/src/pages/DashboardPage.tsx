@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   AlertTriangle,
   FileCheck,
-  Gavel,
   Home,
   RefreshCw,
   TrendingUp,
@@ -30,7 +29,6 @@ import { useAuth } from "@/context/AuthContext";
 import {
   apiGetDashboardStats,
   apiListAgreements,
-  apiListDisputes,
   apiListProperties,
   apiListRentAdjustments,
   type DashboardStats,
@@ -46,34 +44,19 @@ const STATUS_COLORS: Record<string, string> = {
   rented: "#6366f1",
   draft: "#94a3b8",
   pending_tenant_signature: "#f97316",
-  pending_dara_verification: "#8b5cf6",
+  pending_payment: "#f59e0b",
   active: "#10b981",
   extended: "#06b6d4",
   terminated: "#64748b",
   expired: "#475569",
-  open: "#ef4444",
-  under_review: "#f59e0b",
-  mediation: "#8b5cf6",
-  resolved: "#10b981",
-  closed: "#64748b",
-  escalated: "#dc2626",
   pending: "#f59e0b",
   approved: "#10b981",
-};
-
-const PRIORITY_COLORS: Record<string, string> = {
-  low: "#10b981",
-  medium: "#f59e0b",
-  high: "#f97316",
-  critical: "#ef4444",
 };
 
 const ROLE_COLORS: Record<string, string> = {
   tenant: "#6366f1",
   landlord: "#f59e0b",
   admin: "#8b5cf6",
-  dara_agent: "#06b6d4",
-  system_admin: "#ef4444",
 };
 
 const PIE_PALETTE = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#f97316", "#64748b"];
@@ -152,10 +135,9 @@ function CustomTooltip({ active, payload, label }: {
 
 type ActionStats = {
   pendingAgreements: number;
-  pendingDaraAgreements: number;
+  pendingExtensions: number;
+  pendingTerminations: number;
   pendingProperties: number;
-  openDisputes: number;
-  underReviewDisputes: number;
   pendingAdjustments: number;
 };
 
@@ -174,17 +156,15 @@ export function DashboardPage() {
       apiGetDashboardStats(token),
       Promise.all([
         apiListAgreements(token, "status=pending_verification&pageSize=1"),
-        apiListAgreements(token, "status=pending_dara_verification&pageSize=1"),
+        apiListAgreements(token, "status=extension_requested&pageSize=1"),
+        apiListAgreements(token, "status=termination_requested&pageSize=1"),
         apiListProperties(token, "status=pending_verification&pageSize=1"),
-        apiListDisputes(token, "status=open&pageSize=1"),
-        apiListDisputes(token, "status=under_review&pageSize=1"),
         apiListRentAdjustments(token, "status=pending&pageSize=1"),
-      ]).then(([pa, pda, pp, od, urd, padj]) => ({
+      ]).then(([pa, pe, pt, pp, padj]) => ({
         pendingAgreements: pa.meta.total,
-        pendingDaraAgreements: pda.meta.total,
+        pendingExtensions: pe.meta.total,
+        pendingTerminations: pt.meta.total,
         pendingProperties: pp.meta.total,
-        openDisputes: od.meta.total,
-        underReviewDisputes: urd.meta.total,
         pendingAdjustments: padj.meta.total,
       })),
     ])
@@ -201,9 +181,9 @@ export function DashboardPage() {
 
   const totalActions = actionStats
     ? actionStats.pendingAgreements +
-      actionStats.pendingDaraAgreements +
+      actionStats.pendingExtensions +
+      actionStats.pendingTerminations +
       actionStats.pendingProperties +
-      actionStats.openDisputes +
       actionStats.pendingAdjustments
     : null;
 
@@ -245,7 +225,7 @@ export function DashboardPage() {
               {totalActions} item{totalActions !== 1 ? "s" : ""} require your attention
             </p>
             <p className="text-xs text-amber-700 mt-0.5">
-              Pending agreements, property reviews, disputes, and rent adjustments need review.
+              Pending agreements, property reviews, and rent adjustments need review.
             </p>
           </div>
         </div>
@@ -262,11 +242,11 @@ export function DashboardPage() {
 
       {/* KPI grid */}
       {loading ? (
-        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonBlock key={i} h="h-32" />)}
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => <SkeletonBlock key={i} h="h-32" />)}
         </div>
       ) : stats && (
-        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           <KpiCard
             label="Total Properties"
             value={stats.overview.totalProperties}
@@ -286,15 +266,6 @@ export function DashboardPage() {
             trend={stats.overview.recentAgreements}
           />
           <KpiCard
-            label="Active Disputes"
-            value={stats.disputesByStatus.find((d) => d.status === "open")?.count ?? 0}
-            sub="Requiring resolution"
-            icon={Gavel}
-            color="text-rose-600 bg-rose-50"
-            to="/disputes?status=open"
-            trend={stats.overview.recentDisputes}
-          />
-          <KpiCard
             label="Platform Users"
             value={stats.overview.totalUsers}
             sub="Landlords, tenants & staff"
@@ -307,7 +278,7 @@ export function DashboardPage() {
 
       {/* Action items grid */}
       {actionStats && (
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 xl:grid-cols-5 gap-4">
           {[
             {
               label: "Agreements awaiting verification",
@@ -316,6 +287,22 @@ export function DashboardPage() {
               icon: FileCheck,
               color: "text-indigo-600 bg-indigo-50",
               urgent: actionStats.pendingAgreements > 0,
+            },
+            {
+              label: "Extension requests",
+              value: actionStats.pendingExtensions,
+              to: "/agreements?status=extension_requested",
+              icon: RefreshCw,
+              color: "text-indigo-600 bg-indigo-50",
+              urgent: actionStats.pendingExtensions > 0,
+            },
+            {
+              label: "Termination requests",
+              value: actionStats.pendingTerminations,
+              to: "/agreements?status=termination_requested",
+              icon: AlertTriangle,
+              color: "text-rose-600 bg-rose-50",
+              urgent: actionStats.pendingTerminations > 0,
             },
             {
               label: "Properties pending review",
@@ -364,7 +351,7 @@ export function DashboardPage() {
         <div className="grid xl:grid-cols-2 gap-5">
           <ChartCard
             title="Platform Activity — Last 6 Months"
-            subtitle="New properties, agreements, and disputes registered monthly"
+            subtitle="New properties and agreements registered monthly"
           >
             <ResponsiveContainer width="100%" height={240}>
               <AreaChart data={stats.monthlyTrend} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -377,10 +364,6 @@ export function DashboardPage() {
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
                     <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="gDisp" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                  </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
@@ -389,7 +372,6 @@ export function DashboardPage() {
                 <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} />
                 <Area type="monotone" dataKey="properties" name="Properties" stroke="#f59e0b" strokeWidth={2} fill="url(#gProp)" dot={false} />
                 <Area type="monotone" dataKey="agreements" name="Agreements" stroke="#6366f1" strokeWidth={2} fill="url(#gAgr)" dot={false} />
-                <Area type="monotone" dataKey="disputes" name="Disputes" stroke="#ef4444" strokeWidth={2} fill="url(#gDisp)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </ChartCard>
@@ -417,11 +399,11 @@ export function DashboardPage() {
 
       {/* Charts row 2: Status distributions */}
       {loading ? (
-        <div className="grid xl:grid-cols-3 gap-5">
-          {Array.from({ length: 3 }).map((_, i) => <SkeletonBlock key={i} h="h-60" />)}
+        <div className="grid xl:grid-cols-2 gap-5">
+          {Array.from({ length: 2 }).map((_, i) => <SkeletonBlock key={i} h="h-60" />)}
         </div>
       ) : stats && (
-        <div className="grid xl:grid-cols-3 gap-5">
+        <div className="grid xl:grid-cols-2 gap-5">
           {/* Properties by status */}
           <ChartCard title="Properties by Status" subtitle="Current verification & occupancy breakdown">
             <ResponsiveContainer width="100%" height={180}>
@@ -481,33 +463,16 @@ export function DashboardPage() {
               </PieChart>
             </ResponsiveContainer>
           </ChartCard>
-
-          {/* Disputes by priority */}
-          <ChartCard title="Disputes by Priority" subtitle="Current open dispute urgency levels">
-            <ResponsiveContainer width="100%" height={180}>
-              <BarChart data={stats.disputesByPriority} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="priority" tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" name="Disputes" radius={[4, 4, 0, 0]}>
-                  {stats.disputesByPriority.map((entry, i) => (
-                    <Cell key={i} fill={PRIORITY_COLORS[entry.priority] ?? PIE_PALETTE[i % PIE_PALETTE.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
         </div>
       )}
 
-      {/* Charts row 3: Users by role + Adjustments + Dispute Status */}
+      {/* Charts row 3: Users by role + Adjustments */}
       {loading ? (
-        <div className="grid xl:grid-cols-3 gap-5">
-          {Array.from({ length: 3 }).map((_, i) => <SkeletonBlock key={i} h="h-56" />)}
+        <div className="grid xl:grid-cols-2 gap-5">
+          {Array.from({ length: 2 }).map((_, i) => <SkeletonBlock key={i} h="h-56" />)}
         </div>
       ) : stats && (
-        <div className="grid xl:grid-cols-3 gap-5">
+        <div className="grid xl:grid-cols-2 gap-5">
           {/* Users by role */}
           <ChartCard title="Users by Role" subtitle="Platform user distribution">
             <ResponsiveContainer width="100%" height={170}>
@@ -553,23 +518,6 @@ export function DashboardPage() {
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
-
-          {/* Disputes by status */}
-          <ChartCard title="Disputes by Status" subtitle="Resolution pipeline overview">
-            <ResponsiveContainer width="100%" height={170}>
-              <BarChart data={stats.disputesByStatus} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="status" tick={{ fontSize: 9, fill: "#94a3b8" }} axisLine={false} tickLine={false} tickFormatter={(v) => v.replace(/_/g, " ")} />
-                <YAxis tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="count" name="Disputes" radius={[4, 4, 0, 0]}>
-                  {stats.disputesByStatus.map((entry, i) => (
-                    <Cell key={i} fill={STATUS_COLORS[entry.status] ?? PIE_PALETTE[i % PIE_PALETTE.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartCard>
         </div>
       )}
 
@@ -580,11 +528,10 @@ export function DashboardPage() {
             <Activity className="w-5 h-5 text-indigo-200" />
             <h3 className="font-semibold">Quick Actions</h3>
           </div>
-          <div className="grid sm:grid-cols-4 gap-3">
+          <div className="grid sm:grid-cols-3 gap-3">
             {[
               { label: "Review pending agreements", to: "/agreements?status=pending_verification", count: actionStats?.pendingAgreements },
               { label: "Verify properties", to: "/properties?status=pending_verification", count: actionStats?.pendingProperties },
-              { label: "Handle open disputes", to: "/disputes?status=open", count: actionStats?.openDisputes },
               { label: "Approve rent adjustments", to: "/rent-adjustments?status=pending", count: actionStats?.pendingAdjustments },
             ].map(({ label, to, count }) => (
               <Link

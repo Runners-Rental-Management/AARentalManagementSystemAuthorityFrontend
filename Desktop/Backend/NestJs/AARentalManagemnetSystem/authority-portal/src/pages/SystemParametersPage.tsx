@@ -147,7 +147,7 @@ export function SystemParametersPage() {
   const [loading, setLoading] = useState(true);
   const [filterCat, setFilterCat] = useState<SystemParameterCategory | "">("");
 
-  const canEdit = user?.role === "system_admin";
+  const canEdit = !!user?.adminAllLocations;
 
   const load = useCallback(() => {
     const token = getAccessToken();
@@ -207,7 +207,7 @@ export function SystemParametersPage() {
           <p className="text-slate-500 text-sm">
             {canEdit
               ? "Configure system-wide policy and operational parameters."
-              : "View current system configuration parameters. Only System Admins can edit values."}
+              : "View current system configuration parameters. Only all-location admins can edit values."}
           </p>
         </div>
         <button

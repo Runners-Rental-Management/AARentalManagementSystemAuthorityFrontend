@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   Building2,
@@ -15,16 +15,16 @@ import {
   ChevronLeft,
   Menu,
   UserCircle,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { apiGetUnreadCount, getAccessToken } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import type { AuthorityRole } from "@/lib/types";
-
 type NavItem = {
   to: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
-  roles?: AuthorityRole[];
+  allLocationsOnly?: boolean;
 };
 
 const NAV: NavItem[] = [
@@ -33,50 +33,40 @@ const NAV: NavItem[] = [
     to: "/agreements",
     label: "Agreement verification",
     icon: FileCheck,
-    roles: ["dara_agent", "admin", "system_admin"],
   },
   {
     to: "/properties",
     label: "Property listings",
     icon: Home,
-    roles: ["dara_agent", "admin", "system_admin"],
-  },
-  {
-    to: "/disputes",
-    label: "Disputes",
-    icon: Gavel,
-    roles: ["dara_agent", "admin", "system_admin"],
   },
   {
     to: "/rent-adjustments",
     label: "Rent adjustments",
     icon: TrendingUp,
-    roles: ["dara_agent", "admin", "system_admin"],
   },
   {
     to: "/users",
     label: "Users",
     icon: Users,
-    roles: ["admin", "system_admin"],
   },
   {
     to: "/parameters",
     label: "System parameters",
     icon: Settings,
-    roles: ["admin", "system_admin"],
+    allLocationsOnly: true,
   },
   {
     to: "/audit-logs",
     label: "Audit logs",
     icon: ScrollText,
-    roles: ["admin", "system_admin"],
   },
+  { to: "/notifications", label: "Notifications", icon: Bell },
 ];
 
-function roleLabel(role: AuthorityRole) {
-  if (role === "dara_agent") return "DARA Officer";
-  if (role === "system_admin") return "System Administrator";
-  return "Government Admin";
+function scopeLabel(user: ReturnType<typeof useAuth>["user"]) {
+  if (!user) return "";
+  if (user.adminAllLocations) return "All Locations Admin";
+  return `${user.adminSubCities.join(", ") || "No Location"} Admin`;
 }
 
 export function AppLayout() {
@@ -84,10 +74,29 @@ export function AppLayout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [unread, setUnread] = useState(0);
 
-  const links = NAV.filter(
-    (item) => !item.roles || (user && item.roles.includes(user.role)),
-  );
+  const links = NAV.filter((item) => !item.allLocationsOnly || user?.adminAllLocations);
+
+  useEffect(() => {
+    let active = true;
+    const poll = async () => {
+      const token = getAccessToken();
+      if (!token) return;
+      try {
+        const count = await apiGetUnreadCount(token);
+        if (active) setUnread(count);
+      } catch {
+        // ignore
+      }
+    };
+    void poll();
+    const id = window.setInterval(poll, 30_000);
+    return () => {
+      active = false;
+      window.clearInterval(id);
+    };
+  }, []);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -188,7 +197,7 @@ export function AppLayout() {
                   {user?.firstName} {user?.lastName}
                 </p>
                 <p className="text-[11px] text-slate-400 truncate">
-                  {user ? roleLabel(user.role) : ""}
+                  {scopeLabel(user)}
                 </p>
               </div>
             )}
@@ -216,7 +225,21 @@ export function AppLayout() {
           <p className="text-sm text-slate-500">
             Addis Ababa residential rental — government administration
           </p>
-          <p className="text-xs text-slate-400 hidden sm:block">{user?.email}</p>
+          <div className="flex items-center gap-4">
+            <NavLink
+              to="/notifications"
+              className="relative text-slate-400 hover:text-slate-700 transition-colors"
+              title="Notifications"
+            >
+              <Bell className="w-5 h-5" />
+              {unread > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+                  {unread > 99 ? "99+" : unread}
+                </span>
+              )}
+            </NavLink>
+            <p className="text-xs text-slate-400 hidden sm:block">{user?.email}</p>
+          </div>
         </header>
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
