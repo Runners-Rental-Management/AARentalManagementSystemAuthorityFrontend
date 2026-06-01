@@ -16,14 +16,6 @@ const AgreementDetailPage = lazy(() =>
     default: m.AgreementDetailPage,
   })),
 );
-const DisputesPage = lazy(() =>
-  import("@/pages/DisputesPage").then((m) => ({ default: m.DisputesPage })),
-);
-const DisputeDetailPage = lazy(() =>
-  import("@/pages/DisputeDetailPage").then((m) => ({
-    default: m.DisputeDetailPage,
-  })),
-);
 const RentAdjustmentsPage = lazy(() =>
   import("@/pages/RentAdjustmentsPage").then((m) => ({
     default: m.RentAdjustmentsPage,
@@ -54,11 +46,14 @@ const AuditLogsPage = lazy(() =>
 const ProfilePage = lazy(() =>
   import("@/pages/ProfilePage").then((m) => ({ default: m.ProfilePage })),
 );
+const NotificationsPage = lazy(() =>
+  import("@/pages/NotificationsPage").then((m) => ({ default: m.NotificationsPage })),
+);
 
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center py-16 text-slate-500">
-      <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+    <div className="flex items-center justify-center py-16 text-stone-500">
+      <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }
@@ -67,8 +62,8 @@ function Protected({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 text-slate-500 bg-slate-50">
-        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 text-stone-500 bg-stone-50">
+        <div className="w-8 h-8 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
         <p className="text-sm">Loading…</p>
       </div>
     );
@@ -95,14 +90,13 @@ function AppRoutes() {
           <Route path="agreements/:id" element={<AgreementDetailPage />} />
           <Route path="properties" element={<PropertiesPage />} />
           <Route path="properties/:id" element={<PropertyDetailPage />} />
-          <Route path="disputes" element={<DisputesPage />} />
-          <Route path="disputes/:id" element={<DisputeDetailPage />} />
           <Route path="rent-adjustments" element={<RentAdjustmentsPage />} />
           <Route path="users" element={<UsersPage />} />
           <Route path="users/:id" element={<UserDetailPage />} />
           <Route path="parameters" element={<SystemParametersPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

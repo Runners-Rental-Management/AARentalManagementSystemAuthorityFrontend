@@ -5,6 +5,8 @@ import { StatusBadge } from "@/components/StatusBadge";
 import {
   apiGetAgreement,
   apiReviewAgreement,
+  apiReviewExtensionRequest,
+  apiReviewTerminationRequest,
   getAccessToken,
 } from "@/lib/api";
 import { getErrorMessage } from "@/lib/api-error";
@@ -15,8 +17,8 @@ import { formatDate, formatMoney } from "@/lib/utils";
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</dt>
-      <dd className="mt-0.5 text-sm font-medium text-slate-900">{value}</dd>
+      <dt className="text-xs font-medium text-stone-500 uppercase tracking-wide">{label}</dt>
+      <dd className="mt-0.5 text-sm font-medium text-stone-900">{value}</dd>
     </div>
   );
 }
@@ -39,9 +41,9 @@ export function AgreementDetailPage() {
       .catch((e) => setError(getErrorMessage(e)));
   }, [id]);
 
-  const isPendingVerification =
-    agreement?.status === "pending_verification" ||
-    agreement?.status === "pending_dara_verification";
+  const isPendingVerification = agreement?.status === "pending_verification";
+  const isTerminationRequested = agreement?.status === "termination_requested";
+  const isExtensionRequested = agreement?.status === "extension_requested";
 
   const review = async (status: "active" | "rejected") => {
     const token = getAccessToken();
@@ -59,7 +61,7 @@ export function AgreementDetailPage() {
       });
       toast.success(
         status === "active"
-          ? "Agreement approved and activated."
+          ? "Agreement verified. Tenant will be notified to pay advance rent."
           : "Agreement rejected.",
       );
       navigate("/agreements?status=pending_verification");
@@ -70,15 +72,56 @@ export function AgreementDetailPage() {
     }
   };
 
+  const reviewPending = async (approved: boolean) => {
+    const token = getAccessToken();
+    if (!token || !id) return;
+    if (!approved && reason.trim().length < 3) {
+      setError("Provide a rejection reason (min 3 characters).");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const updated = isExtensionRequested
+        ? await apiReviewExtensionRequest(token, id, {
+            approved,
+            reason: approved ? undefined : reason.trim(),
+          })
+        : await apiReviewTerminationRequest(token, id, {
+            approved,
+            reason: approved ? undefined : reason.trim(),
+          });
+      setAgreement(updated);
+      toast.success(
+        approved
+          ? isExtensionRequested
+            ? "Extension approved."
+            : "Termination approved."
+          : isExtensionRequested
+            ? "Extension request rejected."
+            : "Termination request rejected.",
+      );
+      navigate(
+        isExtensionRequested
+          ? "/agreements?status=extension_requested"
+          : "/agreements?status=termination_requested",
+      );
+    } catch (e) {
+      setError(getErrorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!agreement && !error) {
     return (
       <div className="max-w-3xl">
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 animate-pulse">
-          <div className="h-6 bg-slate-100 rounded w-1/2" />
-          <div className="h-4 bg-slate-100 rounded w-1/3" />
+        <div className="bg-white rounded-xl border border-stone-200 p-6 space-y-4 animate-pulse">
+          <div className="h-6 bg-stone-100 rounded w-1/2" />
+          <div className="h-4 bg-stone-100 rounded w-1/3" />
           <div className="grid sm:grid-cols-2 gap-4 mt-4">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-10 bg-slate-100 rounded" />
+              <div key={i} className="h-10 bg-stone-100 rounded" />
             ))}
           </div>
         </div>
@@ -90,7 +133,7 @@ export function AgreementDetailPage() {
     <div className="max-w-3xl">
       <Link
         to="/agreements"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-indigo-600 mb-5 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-primary-600 mb-5 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to agreements
@@ -103,15 +146,15 @@ export function AgreementDetailPage() {
       )}
 
       {agreement && (
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
           {/* Header */}
-          <div className="p-6 border-b border-slate-100">
+          <div className="p-6 border-b border-stone-100">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-xl font-bold text-slate-900">
+                <h1 className="text-xl font-bold text-stone-900">
                   {agreement.propertyTitle}
                 </h1>
-                <p className="text-slate-500 text-sm mt-0.5 flex items-center gap-1">
+                <p className="text-stone-500 text-sm mt-0.5 flex items-center gap-1">
                   <Home className="w-3.5 h-3.5" />
                   {agreement.propertyAddress}
                 </p>
@@ -124,7 +167,7 @@ export function AgreementDetailPage() {
           <div className="p-6 grid sm:grid-cols-2 gap-6">
             {/* Parties */}
             <div className="col-span-full sm:col-span-1 space-y-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5" />
                 Parties
               </h2>
@@ -136,7 +179,7 @@ export function AgreementDetailPage() {
 
             {/* Financials */}
             <div className="space-y-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
                 <DollarSign className="w-3.5 h-3.5" />
                 Financials
               </h2>
@@ -154,7 +197,7 @@ export function AgreementDetailPage() {
 
             {/* Timeline */}
             <div className="space-y-4">
-              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Calendar className="w-3.5 h-3.5" />
                 Timeline
               </h2>
@@ -189,7 +232,7 @@ export function AgreementDetailPage() {
             {/* Utilities */}
             {agreement.utilities.length > 0 && (
               <div className="space-y-4">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5" />
                   Utilities included
                 </h2>
@@ -197,7 +240,7 @@ export function AgreementDetailPage() {
                   {agreement.utilities.map((u) => (
                     <span
                       key={u}
-                      className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700 capitalize"
+                      className="px-2.5 py-1 rounded-full text-xs font-medium bg-stone-100 text-stone-700 capitalize"
                     >
                       {u.replace(/_/g, " ")}
                     </span>
@@ -209,32 +252,47 @@ export function AgreementDetailPage() {
             {/* Termination reason */}
             {agreement.terminationReason && (
               <div className="col-span-full">
-                <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                  Termination / rejection reason
+                <h2 className="text-xs font-semibold text-stone-400 uppercase tracking-wider mb-2">
+                  {isExtensionRequested ? "Extension note" : "Termination / rejection reason"}
                 </h2>
-                <p className="text-sm text-slate-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
+                <p className="text-sm text-stone-600 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
                   {agreement.terminationReason}
                 </p>
               </div>
             )}
+
+            {isExtensionRequested && agreement.proposedEndDate && (
+              <div className="col-span-full grid sm:grid-cols-2 gap-4">
+                <DetailRow
+                  label="Proposed end date"
+                  value={formatDate(agreement.proposedEndDate)}
+                />
+                {agreement.proposedMonthlyRent != null && (
+                  <DetailRow
+                    label="Proposed monthly rent"
+                    value={formatMoney(agreement.proposedMonthlyRent)}
+                  />
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Review actions */}
+          {/* Initial verification */}
           {isPendingVerification && (
-            <div className="p-6 border-t border-slate-100 bg-slate-50 space-y-4">
-              <h2 className="text-sm font-semibold text-slate-700">
+            <div className="p-6 border-t border-stone-100 bg-stone-50 space-y-4">
+              <h2 className="text-sm font-semibold text-stone-700">
                 Authority review
               </h2>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                <label className="block text-xs font-medium text-stone-600 mb-1.5">
                   Rejection reason
-                  <span className="text-slate-400 ml-1">(required if rejecting)</span>
+                  <span className="text-stone-400 ml-1">(required if rejecting)</span>
                 </label>
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   rows={3}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                  className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
                   placeholder="Explain why the agreement is being rejected…"
                 />
               </div>
@@ -252,12 +310,58 @@ export function AgreementDetailPage() {
                   onClick={() => review("active")}
                   className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
                 >
-                  {busy ? "Processing…" : "Approve & Activate"}
+                  {busy ? "Processing…" : "Approve (awaiting payment)"}
                 </button>
                 <button
                   type="button"
                   disabled={busy}
                   onClick={() => review("rejected")}
+                  className="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
+                >
+                  {busy ? "Processing…" : "Reject"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {(isTerminationRequested || isExtensionRequested) && (
+            <div className="p-6 border-t border-stone-100 bg-stone-50 space-y-4">
+              <h2 className="text-sm font-semibold text-stone-700">
+                {isExtensionRequested ? "Review extension request" : "Review termination request"}
+              </h2>
+              <div>
+                <label className="block text-xs font-medium text-stone-600 mb-1.5">
+                  Rejection reason
+                  <span className="text-stone-400 ml-1">(required if rejecting)</span>
+                </label>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
+                  placeholder="Explain why the request is being rejected…"
+                />
+              </div>
+
+              {error && (
+                <div className="px-3 py-2 rounded-lg bg-rose-50 border border-rose-200 text-sm text-rose-700">
+                  {error}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => reviewPending(true)}
+                  className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
+                >
+                  {busy ? "Processing…" : "Approve"}
+                </button>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => reviewPending(false)}
                   className="px-5 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
                 >
                   {busy ? "Processing…" : "Reject"}

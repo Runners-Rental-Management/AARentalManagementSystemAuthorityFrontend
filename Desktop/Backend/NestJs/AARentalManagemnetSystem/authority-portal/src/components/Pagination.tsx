@@ -29,8 +29,8 @@ export function Pagination({ page, totalPages, total, pageSize, onPage }: Props)
   }
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100">
-      <p className="text-xs text-slate-500">
+    <div className="flex items-center justify-between px-4 py-3 border-t border-stone-100">
+      <p className="text-xs text-stone-500">
         Showing {from}–{to} of {total}
       </p>
       <div className="flex items-center gap-1">
@@ -38,7 +38,7 @@ export function Pagination({ page, totalPages, total, pageSize, onPage }: Props)
           type="button"
           disabled={page === 1}
           onClick={() => onPage(page - 1)}
-          className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="p-1.5 rounded-lg hover:bg-stone-100 disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Previous page"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -46,7 +46,7 @@ export function Pagination({ page, totalPages, total, pageSize, onPage }: Props)
 
         {pages.map((p, i) =>
           p === "..." ? (
-            <span key={`ellipsis-${i}`} className="px-2 text-slate-400 text-sm">
+            <span key={`ellipsis-${i}`} className="px-2 text-stone-400 text-sm">
               …
             </span>
           ) : (
@@ -57,8 +57,8 @@ export function Pagination({ page, totalPages, total, pageSize, onPage }: Props)
               className={cn(
                 "min-w-[2rem] h-8 px-2 rounded-lg text-sm font-medium",
                 p === page
-                  ? "bg-indigo-600 text-white"
-                  : "hover:bg-slate-100 text-slate-600",
+                  ? "bg-primary-600 text-white"
+                  : "hover:bg-stone-100 text-stone-600",
               )}
             >
               {p}
@@ -70,7 +70,7 @@ export function Pagination({ page, totalPages, total, pageSize, onPage }: Props)
           type="button"
           disabled={page === totalPages}
           onClick={() => onPage(page + 1)}
-          className="p-1.5 rounded-lg hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="p-1.5 rounded-lg hover:bg-stone-100 disabled:opacity-40 disabled:cursor-not-allowed"
           aria-label="Next page"
         >
           <ChevronRight className="w-4 h-4" />

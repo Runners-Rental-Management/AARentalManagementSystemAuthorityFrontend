@@ -1,4 +1,4 @@
-export type AuthorityRole = "admin" | "dara_agent" | "system_admin";
+export type AuthorityRole = "admin";
 
 export interface User {
   id: string;
@@ -6,7 +6,10 @@ export interface User {
   lastName: string;
   email: string;
   phone: string;
+  address?: string;
   role: AuthorityRole;
+  adminSubCities: string[];
+  adminAllLocations: boolean;
   isVerified: boolean;
   createdAt: string;
 }
@@ -16,6 +19,16 @@ export type PropertyStatus =
   | "available"
   | "rejected"
   | "rented";
+
+export interface PropertyDocument {
+  id: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  storageKey: string;
+  description?: string;
+  uploadedAt: string;
+}
 
 export interface Property {
   id: string;
@@ -36,6 +49,8 @@ export interface Property {
   description: string;
   amenities: string[];
   homeCondition?: string;
+  images: string[];
+  documents: PropertyDocument[];
   verifiedAt?: string;
   createdAt: string;
 }
@@ -45,7 +60,10 @@ export type AgreementStatus =
   | "pending_tenant_signature"
   | "pending_verification"
   | "pending_dara_verification"
+  | "pending_payment"
   | "active"
+  | "extension_requested"
+  | "termination_requested"
   | "extended"
   | "terminated"
   | "expired"
@@ -68,37 +86,10 @@ export interface TenancyAgreement {
   utilities: string[];
   tenantSignedAt?: string;
   verifiedAt?: string;
+  proposedEndDate?: string;
+  proposedMonthlyRent?: number;
   createdAt: string;
   terminationReason?: string;
-}
-
-export type DisputeStatus =
-  | "open"
-  | "under_review"
-  | "mediation"
-  | "resolved"
-  | "closed"
-  | "escalated";
-
-export type PriorityLevel = "low" | "medium" | "high" | "critical";
-
-export interface Dispute {
-  id: string;
-  agreementId: string;
-  propertyId?: string;
-  propertyTitle?: string;
-  reporterName: string;
-  respondentName: string;
-  violationType: string;
-  title: string;
-  description: string;
-  status: DisputeStatus;
-  priority: PriorityLevel;
-  createdAt: string;
-  resolvedAt?: string;
-  resolution?: string;
-  assignedTo?: string;
-  assignedToId?: string;
 }
 
 export type RentAdjustmentStatus =
@@ -131,9 +122,7 @@ export type Paginated<T> = {
 export type PlatformRole =
   | "tenant"
   | "landlord"
-  | "admin"
-  | "dara_agent"
-  | "system_admin";
+  | "admin";
 
 export interface PlatformUser {
   id: string;
@@ -142,6 +131,8 @@ export interface PlatformUser {
   lastName: string;
   phone: string;
   role: PlatformRole;
+  adminSubCities?: string[];
+  adminAllLocations?: boolean;
   isVerified: boolean;
   faydaVerified: boolean;
   createdAt: string;
@@ -151,7 +142,6 @@ export interface PlatformUser {
     ownedProperties: number;
     agreementsAsLandlord: number;
     agreementsAsTenant: number;
-    reportedDisputes?: number;
   };
 }
 

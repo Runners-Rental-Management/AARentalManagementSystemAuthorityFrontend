@@ -20,24 +20,18 @@ const ROLE_LABELS: Record<PlatformRole, string> = {
   tenant: "Tenant",
   landlord: "Landlord",
   admin: "Admin",
-  dara_agent: "DARA Agent",
-  system_admin: "System Admin",
 };
 
 const ROLE_COLORS: Record<PlatformRole, string> = {
   tenant: "bg-sky-100 text-sky-800",
   landlord: "bg-amber-100 text-amber-800",
   admin: "bg-violet-100 text-violet-800",
-  dara_agent: "bg-indigo-100 text-indigo-800",
-  system_admin: "bg-rose-100 text-rose-800",
 };
 
 const ALL_ROLES: PlatformRole[] = [
   "tenant",
   "landlord",
   "admin",
-  "dara_agent",
-  "system_admin",
 ];
 
 function RoleBadge({ role }: { role: PlatformRole }) {
@@ -55,21 +49,21 @@ function UserRow({ user }: { user: PlatformUser }) {
     user.lockedUntil && new Date(user.lockedUntil) > new Date();
 
   return (
-    <tr className="hover:bg-slate-50 transition-colors">
+    <tr className="hover:bg-stone-50 transition-colors">
       <td className="px-4 py-3">
         <Link
           to={`/users/${user.id}`}
           className="flex items-center gap-3 group"
         >
-          <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-semibold text-sm flex-shrink-0">
+          <div className="w-9 h-9 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-semibold text-sm flex-shrink-0">
             {user.firstName[0]?.toUpperCase()}
             {user.lastName[0]?.toUpperCase()}
           </div>
           <div>
-            <p className="font-medium text-slate-900 group-hover:text-indigo-600 transition-colors">
+            <p className="font-medium text-stone-900 group-hover:text-primary-600 transition-colors">
               {user.firstName} {user.lastName}
             </p>
-            <p className="text-xs text-slate-500">{user.email}</p>
+            <p className="text-xs text-stone-500">{user.email}</p>
           </div>
         </Link>
       </td>
@@ -81,30 +75,37 @@ function UserRow({ user }: { user: PlatformUser }) {
           {user.isVerified ? (
             <ShieldCheck className="w-4 h-4 text-emerald-500" />
           ) : (
-            <Shield className="w-4 h-4 text-slate-300" />
+            <Shield className="w-4 h-4 text-stone-300" />
           )}
           <span
-            className={`text-xs font-medium ${user.isVerified ? "text-emerald-700" : "text-slate-400"}`}
+            className={`text-xs font-medium ${user.isVerified ? "text-emerald-700" : "text-stone-400"}`}
           >
             {user.isVerified ? "Verified" : "Unverified"}
           </span>
         </div>
       </td>
-      <td className="px-4 py-3 text-sm text-slate-600">
+      <td className="px-4 py-3 text-sm text-stone-600">
         {user.phone}
       </td>
       <td className="px-4 py-3">
-        <div className="flex gap-3 text-xs text-slate-500">
+        <div className="flex gap-3 text-xs text-stone-500">
           {user.role === "landlord" && (
             <span className="flex items-center gap-1">
               <Building2 className="w-3 h-3" />
               {user._count?.ownedProperties ?? 0} props
             </span>
           )}
-          {(user.role === "landlord" || user.role === "admin" || user.role === "system_admin" || user.role === "dara_agent") && (
+          {(user.role === "landlord" || user.role === "admin") && (
             <span className="flex items-center gap-1">
               <FileText className="w-3 h-3" />
               {user._count?.agreementsAsLandlord ?? 0} agreements
+            </span>
+          )}
+          {user.role === "admin" && (
+            <span className="text-stone-400">
+              {user.adminAllLocations
+                ? "All locations"
+                : `${user.adminSubCities?.join(", ") || "No location"} scope`}
             </span>
           )}
           {user.role === "tenant" && (
@@ -121,10 +122,10 @@ function UserRow({ user }: { user: PlatformUser }) {
             <Lock className="w-3 h-3" /> Locked
           </span>
         ) : (
-          <span className="text-xs text-slate-400">Active</span>
+          <span className="text-xs text-stone-400">Active</span>
         )}
       </td>
-      <td className="px-4 py-3 text-xs text-slate-500">
+      <td className="px-4 py-3 text-xs text-stone-500">
         {new Date(user.createdAt).toLocaleDateString()}
       </td>
     </tr>
@@ -137,7 +138,7 @@ function SkeletonRow() {
       {[40, 24, 20, 20, 32, 16, 20].map((w, i) => (
         <td key={i} className="px-4 py-3">
           <div
-            className={`h-4 bg-slate-200 rounded animate-pulse`}
+            className={`h-4 bg-stone-200 rounded animate-pulse`}
             style={{ width: `${w * 3}px`, maxWidth: "100%" }}
           />
         </td>
@@ -198,18 +199,18 @@ export function UsersPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">
+        <h1 className="text-2xl font-bold text-stone-900 mb-1">
           User Management
         </h1>
-        <p className="text-slate-500 text-sm">
+        <p className="text-stone-500 text-sm">
           Browse and inspect all registered platform users.
         </p>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-5">
-        <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2 flex-1 min-w-48 max-w-sm">
-          <Search className="w-4 h-4 text-slate-400" />
+        <div className="flex items-center gap-2 bg-white border border-stone-200 rounded-lg px-3 py-2 flex-1 min-w-48 max-w-sm">
+          <Search className="w-4 h-4 text-stone-400" />
           <input
             className="flex-1 text-sm outline-none bg-transparent"
             placeholder="Search name, email, phone…"
@@ -220,7 +221,7 @@ export function UsersPage() {
           {inputSearch && (
             <button
               type="button"
-              className="text-slate-400 hover:text-slate-600"
+              className="text-stone-400 hover:text-stone-600"
               onClick={() => {
                 setInputSearch("");
                 setParam("search", "");
@@ -233,7 +234,7 @@ export function UsersPage() {
         <button
           type="button"
           onClick={handleSearch}
-          className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+          className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 transition-colors"
         >
           Search
         </button>
@@ -241,7 +242,7 @@ export function UsersPage() {
           <button
             type="button"
             onClick={() => setParam("role", "")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${!roleFilter ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${!roleFilter ? "bg-primary-600 text-white border-primary-600" : "bg-white text-stone-600 border-stone-200 hover:bg-stone-50"}`}
           >
             All roles
           </button>
@@ -250,7 +251,7 @@ export function UsersPage() {
               key={r}
               type="button"
               onClick={() => setParam("role", r)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${roleFilter === r ? "bg-indigo-600 text-white border-indigo-600" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${roleFilter === r ? "bg-primary-600 text-white border-primary-600" : "bg-white text-stone-600 border-stone-200 hover:bg-stone-50"}`}
             >
               {ROLE_LABELS[r]}
             </button>
@@ -259,16 +260,16 @@ export function UsersPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div className="bg-white border border-stone-200 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
+              <tr className="border-b border-stone-200 bg-stone-50">
                 {["User", "Role", "Verification", "Phone", "Activity", "Status", "Joined"].map(
                   (h) => (
                     <th
                       key={h}
-                      className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide"
+                      className="px-4 py-3 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide"
                     >
                       {h}
                     </th>
@@ -276,7 +277,7 @@ export function UsersPage() {
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-stone-100">
               {loading
                 ? Array.from({ length: 8 }).map((_, i) => (
                     <SkeletonRow key={i} />
@@ -286,7 +287,7 @@ export function UsersPage() {
                 <tr>
                   <td
                     colSpan={7}
-                    className="px-4 py-12 text-center text-slate-400"
+                    className="px-4 py-12 text-center text-stone-400"
                   >
                     <User className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     No users found

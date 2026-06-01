@@ -88,7 +88,7 @@ export function RentAdjustmentsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-4">Rent adjustments</h1>
+      <h1 className="text-2xl font-bold text-stone-900 mb-4">Rent adjustments</h1>
 
       <div className="flex gap-2 mb-6">
         {["pending", "under_review", "approved", "rejected", "all"].map((s) => (
@@ -98,8 +98,8 @@ export function RentAdjustmentsPage() {
             onClick={() => setFilter(s)}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium border capitalize transition-colors ${
               filter === s
-                ? "bg-indigo-600 text-white border-indigo-600"
-                : "bg-white border-slate-200 text-slate-600 hover:border-indigo-300"
+                ? "bg-primary-600 text-white border-primary-600"
+                : "bg-white border-stone-200 text-stone-600 hover:border-primary-300"
             }`}
           >
             {s.replace(/_/g, " ")}
@@ -119,12 +119,12 @@ export function RentAdjustmentsPage() {
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="bg-white rounded-xl border border-slate-200 p-5 animate-pulse h-36"
+              className="bg-white rounded-xl border border-stone-200 p-5 animate-pulse h-36"
             />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <p className="text-slate-500 text-center py-16">No rent adjustments found.</p>
+        <p className="text-stone-500 text-center py-16">No rent adjustments found.</p>
       ) : (
         <>
           <div className="space-y-4">
@@ -133,18 +133,18 @@ export function RentAdjustmentsPage() {
               return (
                 <div
                   key={a.id}
-                  className="bg-white rounded-xl border border-slate-200 p-5"
+                  className="bg-white rounded-xl border border-stone-200 p-5"
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div>
-                      <p className="font-semibold text-slate-900">{a.propertyTitle}</p>
-                      <p className="text-sm text-slate-500">{a.landlordName}</p>
+                      <p className="font-semibold text-stone-900">{a.propertyTitle}</p>
+                      <p className="text-sm text-stone-500">{a.landlordName}</p>
                     </div>
                     <StatusBadge value={a.status} />
                   </div>
 
                   <div className="flex flex-wrap gap-4 mb-3 text-sm">
-                    <div className="flex items-center gap-2 text-slate-600">
+                    <div className="flex items-center gap-2 text-stone-600">
                       <TrendingUp className="w-4 h-4" />
                       <span>
                         {formatMoney(a.currentRent)} →{" "}
@@ -166,10 +166,10 @@ export function RentAdjustmentsPage() {
                     )}
                   </div>
 
-                  <p className="text-sm text-slate-600 mb-2 leading-relaxed">
+                  <p className="text-sm text-stone-600 mb-2 leading-relaxed">
                     {a.reason}
                   </p>
-                  <p className="text-xs text-slate-400 mb-4">
+                  <p className="text-xs text-stone-400 mb-4">
                     Submitted {formatDate(a.createdAt)}
                     {a.reviewedAt && ` · Reviewed ${formatDate(a.reviewedAt)}`}
                   </p>
@@ -189,7 +189,7 @@ export function RentAdjustmentsPage() {
                         onChange={(e) =>
                           setNotes((n) => ({ ...n, [a.id]: e.target.value }))
                         }
-                        className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
                       />
                       <button
                         type="button"
@@ -226,7 +226,7 @@ export function RentAdjustmentsPage() {
                         onChange={(e) =>
                           setNotes((n) => ({ ...n, [a.id]: e.target.value }))
                         }
-                        className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        className="flex-1 rounded-lg border border-stone-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
                       />
                       <button
                         type="button"
@@ -251,7 +251,7 @@ export function RentAdjustmentsPage() {
             })}
           </div>
 
-          <div className="mt-4 bg-white rounded-xl border border-slate-200">
+          <div className="mt-4 bg-white rounded-xl border border-stone-200">
             <Pagination
               page={meta.page}
               totalPages={meta.totalPages}

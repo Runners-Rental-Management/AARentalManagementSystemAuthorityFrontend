@@ -2,10 +2,10 @@ import { ApiError } from "@/lib/api-error";
 import type {
   AuditLog,
   AuthorityRole,
-  Dispute,
   Paginated,
   PlatformUser,
   Property,
+  PropertyDocument,
   RentAdjustment,
   SystemParameter,
   TenancyAgreement,
@@ -195,7 +195,12 @@ export async function apiGetMe(token: string) {
     lastName: String(raw.lastName ?? ""),
     email: String(raw.email ?? ""),
     phone: String(raw.phone ?? ""),
+    address: String(raw.address ?? ""),
     role: String(raw.role) as User["role"],
+    adminSubCities: Array.isArray(raw.adminSubCities)
+      ? raw.adminSubCities.map(String)
+      : [],
+    adminAllLocations: Boolean(raw.adminAllLocations),
     isVerified: Boolean(raw.isVerified),
     createdAt: toIso(raw.createdAt),
   } satisfies User;
@@ -203,7 +208,7 @@ export async function apiGetMe(token: string) {
 
 export async function apiUpdateMe(
   token: string,
-  data: { firstName?: string; lastName?: string; phone?: string; address?: string },
+  data: { address?: string },
 ) {
   const raw = await apiRequest<Record<string, unknown>>("/users/me", {
     method: "PATCH",
@@ -216,10 +221,30 @@ export async function apiUpdateMe(
     lastName: String(raw.lastName ?? ""),
     email: String(raw.email ?? ""),
     phone: String(raw.phone ?? ""),
+    address: String(raw.address ?? ""),
     role: String(raw.role) as User["role"],
+    adminSubCities: Array.isArray(raw.adminSubCities)
+      ? raw.adminSubCities.map(String)
+      : [],
+    adminAllLocations: Boolean(raw.adminAllLocations),
     isVerified: Boolean(raw.isVerified),
     createdAt: toIso(raw.createdAt),
   } satisfies User;
+}
+
+export async function apiChangePassword(
+  token: string,
+  data: { email: string; currentPassword: string; newPassword: string },
+) {
+  return apiRequest<{ ok: boolean }>("/users/me/password", {
+    method: "PATCH",
+    token,
+    body: {
+      email: data.email.trim().toLowerCase(),
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword,
+    },
+  });
 }
 
 export async function apiLogout(token: string) {
@@ -242,6 +267,18 @@ function mapProperty(raw: Record<string, unknown>): Property {
     email?: string;
     phone?: string;
   } | undefined;
+
+  const rawDocs = Array.isArray(raw.documents) ? raw.documents : [];
+  const documents: PropertyDocument[] = rawDocs.map((d: Record<string, unknown>) => ({
+    id: String(d.id ?? ""),
+    fileName: String(d.fileName ?? ""),
+    fileType: String(d.fileType ?? ""),
+    fileSize: Number(d.fileSize ?? 0),
+    storageKey: String(d.storageKey ?? ""),
+    description: d.description ? String(d.description) : undefined,
+    uploadedAt: toIso(d.uploadedAt as string),
+  }));
+
   return {
     id: String(raw.id),
     title: String(raw.title ?? ""),
@@ -262,10 +299,10 @@ function mapProperty(raw: Record<string, unknown>): Property {
     landlordEmail: landlord?.email,
     landlordPhone: landlord?.phone,
     description: String(raw.description ?? ""),
-    amenities: Array.isArray(raw.amenities)
-      ? raw.amenities.map(String)
-      : [],
+    amenities: Array.isArray(raw.amenities) ? raw.amenities.map(String) : [],
     homeCondition: raw.homeCondition ? String(raw.homeCondition) : undefined,
+    images: Array.isArray(raw.images) ? raw.images.map(String) : [],
+    documents,
     verifiedAt: toIsoOptional(raw.verifiedAt),
     createdAt: toIso(raw.createdAt),
   };
@@ -327,6 +364,9 @@ function mapAgreement(raw: Record<string, unknown>): TenancyAgreement {
     utilities: Array.isArray(raw.utilities) ? raw.utilities.map(String) : [],
     tenantSignedAt: toIsoOptional(raw.tenantSignedAt),
     verifiedAt: toIsoOptional(raw.verifiedAt),
+    proposedEndDate: toIsoOptional(raw.proposedEndDate),
+    proposedMonthlyRent:
+      raw.proposedMonthlyRent != null ? Number(raw.proposedMonthlyRent) : undefined,
     createdAt: toIso(raw.createdAt),
     terminationReason: raw.terminationReason
       ? String(raw.terminationReason)
@@ -362,77 +402,28 @@ export async function apiReviewAgreement(
   return mapAgreement(r);
 }
 
-// ─── Disputes ──────────────────────────────────────────────────────────────
-
-function mapDispute(raw: Record<string, unknown>): Dispute {
-  const reporter = raw.reporter as { firstName?: string; lastName?: string };
-  const respondent = raw.respondent as { firstName?: string; lastName?: string };
-  const assigned = raw.assignedTo as {
-    id?: string;
-    firstName?: string;
-    lastName?: string;
-  };
-  const property = raw.property as { id?: string; title?: string };
-  return {
-    id: String(raw.id),
-    agreementId: String(raw.agreementId),
-    propertyId: property?.id,
-    propertyTitle: property?.title,
-    reporterName:
-      reporter?.firstName && reporter?.lastName
-        ? `${reporter.firstName} ${reporter.lastName}`.trim()
-        : "Reporter",
-    respondentName:
-      respondent?.firstName && respondent?.lastName
-        ? `${respondent.firstName} ${respondent.lastName}`.trim()
-        : "Respondent",
-    violationType: String(raw.violationType ?? ""),
-    title: String(raw.title ?? ""),
-    description: String(raw.description ?? ""),
-    status: raw.status as Dispute["status"],
-    priority: (raw.priority as Dispute["priority"]) ?? "medium",
-    createdAt: toIso(raw.createdAt),
-    resolvedAt: toIsoOptional(raw.resolvedAt),
-    resolution: raw.resolution ? String(raw.resolution) : undefined,
-    assignedTo:
-      assigned?.firstName && assigned?.lastName
-        ? `${assigned.firstName} ${assigned.lastName}`.trim()
-        : undefined,
-    assignedToId: assigned?.id,
-  };
-}
-
-export async function apiListDisputes(token: string, query: string) {
-  const r = await apiRequest<Paginated<Record<string, unknown>>>(
-    `/disputes?${query}`,
-    { token },
-  );
-  return { ...r, items: r.items.map(mapDispute) };
-}
-
-export async function apiGetDispute(token: string, id: string) {
-  return mapDispute(
-    await apiRequest<Record<string, unknown>>(`/disputes/${id}`, { token }),
-  );
-}
-
-export async function apiReviewDispute(
+export async function apiReviewTerminationRequest(
   token: string,
   id: string,
-  body: {
-    status: Dispute["status"];
-    priority?: Dispute["priority"];
-    resolution?: string;
-    assignedToId?: string;
-  },
+  body: { approved: boolean; reason?: string },
 ) {
-  return mapDispute(
-    await apiRequest<Record<string, unknown>>(`/disputes/${id}/review`, {
-      method: "PATCH",
-      token,
-      body,
-    }),
+  const r = await apiRequest<Record<string, unknown>>(
+    `/agreements/${id}/review-termination`,
+    { method: "PATCH", token, body },
   );
+  return mapAgreement(r);
+}
+
+export async function apiReviewExtensionRequest(
+  token: string,
+  id: string,
+  body: { approved: boolean; reason?: string },
+) {
+  const r = await apiRequest<Record<string, unknown>>(
+    `/agreements/${id}/review-extension`,
+    { method: "PATCH", token, body },
+  );
+  return mapAgreement(r);
 }
 
 // ─── Rent Adjustments ──────────────────────────────────────────────────────
@@ -496,6 +487,10 @@ function mapPlatformUser(raw: Record<string, unknown>): PlatformUser {
     lastName: String(raw.lastName ?? ""),
     phone: String(raw.phone ?? ""),
     role: raw.role as PlatformUser["role"],
+    adminSubCities: Array.isArray(raw.adminSubCities)
+      ? raw.adminSubCities.map(String)
+      : [],
+    adminAllLocations: Boolean(raw.adminAllLocations),
     isVerified: Boolean(raw.isVerified),
     faydaVerified: Boolean(raw.faydaVerified),
     createdAt: toIso(raw.createdAt),
@@ -509,20 +504,16 @@ export interface DashboardStats {
   overview: {
     totalProperties: number;
     totalAgreements: number;
-    totalDisputes: number;
     totalUsers: number;
     recentProperties: number;
     recentAgreements: number;
-    recentDisputes: number;
   };
   propertiesByStatus: { status: string; count: number }[];
   agreementsByStatus: { status: string; count: number }[];
-  disputesByStatus: { status: string; count: number }[];
-  disputesByPriority: { priority: string; count: number }[];
   adjustmentsByStatus: { status: string; count: number }[];
   usersByRole: { role: string; count: number }[];
   propertiesBySubCity: { subCity: string; count: number }[];
-  monthlyTrend: { month: string; properties: number; agreements: number; disputes: number }[];
+  monthlyTrend: { month: string; properties: number; agreements: number }[];
 }
 
 export async function apiGetDashboardStats(token: string): Promise<DashboardStats> {
@@ -616,11 +607,50 @@ export async function apiUpdateSystemParameter(
 // ─── Constants ─────────────────────────────────────────────────────────────
 
 export const AUTHORITY_ROLES: AuthorityRole[] = [
-  "dara_agent",
   "admin",
-  "system_admin",
 ];
 
 export function isAuthorityRole(role: string): role is AuthorityRole {
   return AUTHORITY_ROLES.includes(role as AuthorityRole);
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+export type BackendNotification = {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: "info" | "warning" | "success" | "error";
+  category: "agreement" | "rent_adjustment" | "verification" | "system";
+  isRead: boolean;
+  link?: string | null;
+  createdAt: string;
+  readAt?: string | null;
+};
+
+export type NotificationListResponse = {
+  items: BackendNotification[];
+  meta: { page: number; pageSize: number; total: number; totalPages: number };
+};
+
+export async function apiListNotifications(
+  token: string,
+  query = "page=1&pageSize=50",
+): Promise<NotificationListResponse> {
+  const suffix = query ? `?${query}` : "";
+  return apiRequest<NotificationListResponse>(`/notifications${suffix}`, { token });
+}
+
+export async function apiGetUnreadCount(token: string): Promise<number> {
+  const res = await apiRequest<{ count: number }>("/notifications/unread-count", { token });
+  return res.count;
+}
+
+export async function apiMarkNotificationRead(token: string, id: string): Promise<void> {
+  await apiRequest(`/notifications/${id}/read`, { method: "PATCH", token });
+}
+
+export async function apiMarkAllNotificationsRead(token: string): Promise<void> {
+  await apiRequest("/notifications/read-all", { method: "PATCH", token });
 }

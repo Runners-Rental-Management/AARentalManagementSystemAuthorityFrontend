@@ -69,14 +69,14 @@ export function PropertiesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-1">Property listings</h1>
-      <p className="text-sm text-slate-500 mb-4">
+      <h1 className="text-2xl font-bold text-stone-900 mb-1">Property listings</h1>
+      <p className="text-sm text-stone-500 mb-4">
         Review and approve/reject registered property listings.
       </p>
 
       {/* Search */}
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
         <input
           type="search"
           placeholder="Search by title, address or sub-city…"
@@ -85,7 +85,7 @@ export function PropertiesPage() {
             if (e.key === "Enter") handleSearch((e.target as HTMLInputElement).value);
           }}
           onBlur={(e) => handleSearch(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          className="w-full pl-9 pr-4 py-2 rounded-lg border border-stone-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary-300"
         />
       </div>
 
@@ -100,8 +100,8 @@ export function PropertiesPage() {
               onClick={() => setStatus(value)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
                 active
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-white text-slate-600 border-slate-200 hover:border-indigo-300"
+                  ? "bg-primary-600 text-white border-primary-600"
+                  : "bg-white text-stone-600 border-stone-200 hover:border-primary-300"
               }`}
             >
               {label}
@@ -116,10 +116,10 @@ export function PropertiesPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-500 text-left">
+            <thead className="bg-stone-50 text-stone-500 text-left">
               <tr>
                 <th className="px-4 py-3 font-medium">Title</th>
                 <th className="px-4 py-3 font-medium">Location</th>
@@ -134,9 +134,9 @@ export function PropertiesPage() {
             <tbody>
               {loading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={i} className="border-t border-slate-100">
+                  <tr key={i} className="border-t border-stone-100">
                     <td className="px-4 py-3" colSpan={8}>
-                      <div className="h-4 bg-slate-100 rounded animate-pulse w-full" />
+                      <div className="h-4 bg-stone-100 rounded animate-pulse w-full" />
                     </td>
                   </tr>
                 ))
@@ -144,33 +144,33 @@ export function PropertiesPage() {
                 items.map((p) => (
                   <tr
                     key={p.id}
-                    className="border-t border-slate-100 hover:bg-slate-50 transition-colors"
+                    className="border-t border-stone-100 hover:bg-stone-50 transition-colors"
                   >
-                    <td className="px-4 py-3 font-medium text-slate-900">
+                    <td className="px-4 py-3 font-medium text-stone-900">
                       {p.title}
                     </td>
-                    <td className="px-4 py-3 text-slate-600 text-xs">
+                    <td className="px-4 py-3 text-stone-600 text-xs">
                       {p.subCity}
                       <br />
-                      <span className="text-slate-400">Woreda {p.woreda}</span>
+                      <span className="text-stone-400">Woreda {p.woreda}</span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600 capitalize">
+                    <td className="px-4 py-3 text-stone-600 capitalize">
                       {p.propertyType}
                     </td>
                     <td className="px-4 py-3 font-medium">
                       {formatMoney(p.monthlyRent)}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{p.landlordName}</td>
+                    <td className="px-4 py-3 text-stone-600">{p.landlordName}</td>
                     <td className="px-4 py-3">
                       <StatusBadge value={p.status} />
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-500">
+                    <td className="px-4 py-3 text-xs text-stone-500">
                       {formatDate(p.createdAt)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link
                         to={`/properties/${p.id}`}
-                        className="text-indigo-600 font-medium hover:underline text-sm"
+                        className="text-primary-600 font-medium hover:underline text-sm"
                       >
                         {p.status === "pending_verification" ? "Review →" : "View →"}
                       </Link>
@@ -183,7 +183,7 @@ export function PropertiesPage() {
         </div>
 
         {!loading && items.length === 0 && (
-          <p className="p-10 text-center text-slate-500">No properties found.</p>
+          <p className="p-10 text-center text-stone-500">No properties found.</p>
         )}
 
         <Pagination
