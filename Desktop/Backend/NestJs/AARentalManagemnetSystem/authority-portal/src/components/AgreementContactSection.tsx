@@ -1,10 +1,12 @@
-import { useCallback, useState } from "react";
-import { Check, Copy, Lock, MapPin, Phone, User } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Check, Copy, Loader2, MapPin, Phone, User } from "lucide-react";
+import { apiGetAgreementContacts, getAccessToken } from "@/lib/api";
 import type { AgreementContacts, AgreementPartyContact } from "@/lib/types";
 
 type Props = {
-  contactsAvailable: boolean;
+  agreementId: string;
   contacts?: AgreementContacts;
+  contactsAvailable?: boolean;
 };
 
 function CopyButton({ value, label }: { value: string; label: string }) {
@@ -115,23 +117,56 @@ function PartyCard({
   );
 }
 
-export function AgreementContactSection({ contactsAvailable, contacts }: Props) {
+/** Authority officials always receive party contact details for review. */
+export function AgreementContactSection({
+  agreementId,
+  contacts: initialContacts,
+  contactsAvailable: initialAvailable,
+}: Props) {
+  const [contacts, setContacts] = useState<AgreementContacts | undefined>(
+    initialAvailable && initialContacts ? initialContacts : undefined,
+  );
+  const [loading, setLoading] = useState(!initialContacts);
+
+  useEffect(() => {
+    if (initialContacts) {
+      setContacts(initialContacts);
+      setLoading(false);
+      return;
+    }
+    const token = getAccessToken();
+    if (!token) return;
+    let cancelled = false;
+    setLoading(true);
+    void apiGetAgreementContacts(token, agreementId)
+      .then((res) => {
+        if (!cancelled && res.contactsAvailable && res.contacts) {
+          setContacts(res.contacts);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [agreementId, initialContacts]);
+
   return (
     <div className="col-span-full bg-white rounded-xl border border-stone-200 p-6">
       <h2 className="text-sm font-semibold text-stone-900 mb-4">
         Contact information
       </h2>
 
-      {!contactsAvailable || !contacts ? (
-        <div className="rounded-xl border border-dashed border-stone-200 bg-stone-50 px-5 py-8 text-center">
-          <div className="mx-auto w-11 h-11 rounded-full bg-stone-100 flex items-center justify-center mb-3">
-            <Lock className="w-5 h-5 text-stone-400" />
-          </div>
-          <p className="text-sm text-stone-500 max-w-lg mx-auto leading-relaxed">
-            Contact information will become available after the rental agreement
-            has been verified and approved by the authority.
-          </p>
+      {loading ? (
+        <div className="flex items-center justify-center gap-2 py-10 text-sm text-stone-500">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading contact information…
         </div>
+      ) : !contacts ? (
+        <p className="text-sm text-stone-500 py-6 text-center">
+          Contact details are not available for this agreement.
+        </p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           <PartyCard

@@ -497,6 +497,26 @@ export async function apiGetAgreement(token: string, id: string) {
   return mapAgreement(r);
 }
 
+export async function apiGetAgreementContacts(token: string, id: string) {
+  const raw = await apiRequest<{
+    contactsAvailable: boolean;
+    contacts?: {
+      landlord?: { fullName?: string; phone?: string; address?: string };
+      tenant?: { fullName?: string; phone?: string; address?: string };
+    };
+  }>(`/agreements/${id}/contacts`, { token });
+  if (!raw.contactsAvailable || !raw.contacts) {
+    return { contactsAvailable: false as const };
+  }
+  return {
+    contactsAvailable: true as const,
+    contacts: {
+      landlord: mapPartyContact(raw.contacts.landlord, "Landlord"),
+      tenant: mapPartyContact(raw.contacts.tenant, "Tenant"),
+    },
+  };
+}
+
 export async function apiReviewAgreement(
   token: string,
   id: string,

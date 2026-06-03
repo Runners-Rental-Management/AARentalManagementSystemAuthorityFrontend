@@ -278,6 +278,7 @@ export function AgreementDetailPage() {
             )}
 
             <AgreementContactSection
+              agreementId={agreement.id}
               contactsAvailable={agreement.contactsAvailable === true}
               contacts={agreement.contacts}
             />
