@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Calendar, DollarSign, FileText, Home, User } from "lucide-react";
+import { AgreementContactSection } from "@/components/AgreementContactSection";
 import { StatusBadge } from "@/components/StatusBadge";
 import {
   apiGetAgreement,
@@ -275,6 +276,11 @@ export function AgreementDetailPage() {
                 )}
               </div>
             )}
+
+            <AgreementContactSection
+              contactsAvailable={agreement.contactsAvailable === true}
+              contacts={agreement.contacts}
+            />
           </div>
 
           {/* Initial verification */}

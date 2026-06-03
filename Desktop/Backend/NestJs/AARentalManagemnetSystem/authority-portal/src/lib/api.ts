@@ -1,5 +1,6 @@
 import { ApiError } from "@/lib/api-error";
 import type {
+  AgreementPartyContact,
   AuditLog,
   AuthorityRole,
   Paginated,
@@ -417,25 +418,44 @@ export async function apiPredictPrice(
 
 // ─── Agreements ────────────────────────────────────────────────────────────
 
+function mapPartyContact(
+  raw: { fullName?: string; phone?: string; address?: string } | undefined,
+  fallbackName: string,
+): AgreementPartyContact {
+  return {
+    fullName: raw?.fullName?.trim() || fallbackName,
+    phone: raw?.phone ?? "",
+    address: raw?.address ?? "",
+  };
+}
+
 function mapAgreement(raw: Record<string, unknown>): TenancyAgreement {
   const landlord = raw.landlord as { id?: string; firstName?: string; lastName?: string };
   const tenant = raw.tenant as { id?: string; firstName?: string; lastName?: string };
   const property = raw.property as { title?: string; address?: string };
+  const contactsRaw = raw.contacts as
+    | {
+        landlord?: { fullName?: string; phone?: string; address?: string };
+        tenant?: { fullName?: string; phone?: string; address?: string };
+      }
+    | undefined;
+  const landlordName =
+    landlord?.firstName && landlord?.lastName
+      ? `${landlord.firstName} ${landlord.lastName}`.trim()
+      : "Landlord";
+  const tenantName =
+    tenant?.firstName && tenant?.lastName
+      ? `${tenant.firstName} ${tenant.lastName}`.trim()
+      : "Tenant";
   return {
     id: String(raw.id),
     propertyId: String(raw.propertyId),
     propertyTitle: property?.title ?? "Property",
     propertyAddress: property?.address ?? "",
     landlordId: landlord?.id ?? String(raw.landlordId ?? ""),
-    landlordName:
-      landlord?.firstName && landlord?.lastName
-        ? `${landlord.firstName} ${landlord.lastName}`.trim()
-        : "Landlord",
+    landlordName,
     tenantId: tenant?.id ?? String(raw.tenantId ?? ""),
-    tenantName:
-      tenant?.firstName && tenant?.lastName
-        ? `${tenant.firstName} ${tenant.lastName}`.trim()
-        : "Tenant",
+    tenantName,
     monthlyRent: Number(raw.monthlyRent ?? 0),
     advancePayment: Number(raw.advancePayment ?? 0),
     startDate: toIso(raw.startDate),
@@ -451,6 +471,14 @@ function mapAgreement(raw: Record<string, unknown>): TenancyAgreement {
     terminationReason: raw.terminationReason
       ? String(raw.terminationReason)
       : undefined,
+    contactsAvailable: raw.contactsAvailable === true,
+    contacts:
+      raw.contactsAvailable === true && contactsRaw
+        ? {
+            landlord: mapPartyContact(contactsRaw.landlord, landlordName),
+            tenant: mapPartyContact(contactsRaw.tenant, tenantName),
+          }
+        : undefined,
   };
 }
 
